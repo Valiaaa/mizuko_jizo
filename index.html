@@ -6,20 +6,131 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>水子地藏</title>
     <link rel="icon" href="assets/icons/icon.png">
+    <link rel="preload" href="assets/cursor/default-cursor.png" as="image">
+    <link rel="preload" href="assets/cursor/key-cursor.png" as="image">
 
     <link rel="stylesheet" href="styles/base.css">
 </head>
 
 <body>
     <div id="bg">
-        <img src="assets/Page2_房间_asset/房间png/room1.png" class="rooms">
+        <div class="room-stage">
+            <img
+                src="assets/Page2_房间_asset/房间png/room1.png"
+                class="rooms"
+                alt="房间场景"
+            >
+
+            <svg
+                class="room-hit-area"
+                viewBox="0 0 1920 1080"
+                preserveAspectRatio="none"
+            >
+                <path
+                    id="room-hotspot"
+                    d="M 958 154 L 1314 322 L 1311 807 L 957 931 L 578 823 L 578 324 Z"
+                    role="button"
+                    tabindex="0"
+                    aria-label="进入下一个房间阶段"
+                />
+            </svg>
+        </div>
+    </div>
+
+    <div class="custom-cursor" aria-hidden="true">
+        <img
+            class="custom-cursor__image custom-cursor__image--default"
+            src="assets/cursor/default-cursor.png"
+            alt=""
+        >
+        <img
+            class="custom-cursor__image custom-cursor__image--key"
+            src="assets/cursor/key-cursor.png"
+            alt=""
+        >
     </div>
 
     <script>
+        const rooms = document.querySelector('.rooms');
+        const roomHotspot = document.querySelector('#room-hotspot');
+        const customCursor = document.querySelector('.custom-cursor');
+        const roomCount = 6;
+        let phase = 1;
 
+        // Keep the phase change in one named function so later animation or
+        // state-management code can call the same entry point.
+        function update() {
+            if (phase >= roomCount) {
+                return;
+            }
+
+            phase += 1;
+            rooms.src = `assets/Page2_房间_asset/房间png/room${phase}.png`;
+            rooms.alt = `房间场景，第 ${phase} 阶段`;
+
+            if (phase === roomCount) {
+                roomHotspot.classList.add('is-complete');
+                customCursor.classList.remove('is-key');
+                roomHotspot.removeAttribute('role');
+                roomHotspot.removeAttribute('tabindex');
+                roomHotspot.removeAttribute('aria-label');
+            }
+        }
+
+        roomHotspot.addEventListener('click', update);
+        roomHotspot.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                update();
+            }
+        });
+
+        // Avoid a flash when moving between phases.
+        for (let index = 2; index <= roomCount; index += 1) {
+            const image = new Image();
+            image.src = `assets/Page2_房间_asset/房间png/room${index}.png`;
+        }
+
+        /*
+         * The embedded preview can stutter when the browser repeatedly
+         * rebuilds native bitmap cursors. Keep one composited cursor layer and
+         * update its transform at most once per animation frame instead.
+         */
+        if (window.matchMedia('(pointer: fine)').matches) {
+            let cursorX = 0;
+            let cursorY = 0;
+            let cursorFrame = 0;
+
+            document.documentElement.classList.add('has-custom-cursor');
+
+            const paintCursor = () => {
+                customCursor.style.transform =
+                    `translate3d(${cursorX - 12}px, ${cursorY - 12}px, 0)`;
+                cursorFrame = 0;
+            };
+
+            window.addEventListener('pointermove', (event) => {
+                cursorX = event.clientX;
+                cursorY = event.clientY;
+                customCursor.classList.toggle(
+                    'is-key',
+                    Boolean(event.target.closest?.('#room-hotspot:not(.is-complete)'))
+                );
+                customCursor.classList.add('is-visible');
+
+                if (!cursorFrame) {
+                    cursorFrame = window.requestAnimationFrame(paintCursor);
+                }
+            }, { passive: true });
+
+            document.documentElement.addEventListener('mouseleave', () => {
+                customCursor.classList.remove('is-visible');
+            });
+
+            window.addEventListener('blur', () => {
+                customCursor.classList.remove('is-visible');
+            });
+        }
     </script>
-    
-    <script src="scripts/pageTransition.js"></script>
-  
-  </body>    
+  </body>
 </html>
