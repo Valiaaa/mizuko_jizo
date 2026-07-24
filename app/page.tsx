@@ -46,7 +46,7 @@ const item = (
   z = 1,
 ): LayerObject => ({
   id,
-  file: objects[id][0],
+  file: objects[id][0].replace(".png", ".webp"),
   x,
   y,
   width,
@@ -135,7 +135,7 @@ export default function Home() {
 
     for (let index = 1; index <= 6; index += 1) {
       const image = new Image();
-      image.src = `/assets/rooms/room${index}.png`;
+      image.src = `/assets/rooms/room${index}.webp`;
     }
 
     return () => {
@@ -181,7 +181,7 @@ export default function Home() {
         onKeyDown={handleKeyDown}
         style={
           {
-            "--room-image": `url("/assets/rooms/room${phase + 1}.png")`,
+            "--room-image": `url("/assets/rooms/room${phase + 1}.webp")`,
           } as CSSProperties
         }
       >

@@ -6,7 +6,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host");
   const protocol = requestHeaders.get("x-forwarded-proto") ?? "https";
-  const socialImage = host ? `${protocol}://${host}/og.png` : undefined;
+  const socialImage = host ? `${protocol}://${host}/og.jpg` : undefined;
 
   return {
     title: "水子地藏｜房间",
