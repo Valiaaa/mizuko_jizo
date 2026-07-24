@@ -1,0 +1,6 @@
+.next
+dist
+node_modules
+.wrangler
+*.psd
+*.pages
