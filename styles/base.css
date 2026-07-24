@@ -63,17 +63,50 @@ body {
 }
 
 .rooms {
+    position: relative;
+    z-index: 0;
     display: block;
     width: 100%;
     height: 100%;
+    object-fit: contain;
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
 }
 
+.layer-field {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.layer-object {
+    position: absolute;
+    display: block;
+    height: auto;
+    transform:
+        translate3d(var(--drag-x, 0px), var(--drag-y, 0px), 0)
+        rotate(var(--object-rotation));
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    animation:
+        subtle-float var(--float-duration, 6000ms)
+        ease-in-out var(--float-delay, 0ms) infinite
+        var(--float-direction, alternate);
+}
+
+.layer-object.is-dragging {
+    animation-play-state: paused;
+}
+
 .room-hit-area {
     position: absolute;
     inset: 0;
+    z-index: 1;
     width: 100%;
     height: 100%;
     pointer-events: auto;
@@ -101,6 +134,41 @@ body {
 #room-hotspot.is-complete {
     pointer-events: none;
     cursor: inherit;
+}
+
+.interaction-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: auto;
+    cursor: var(--cursor-default);
+    touch-action: none;
+}
+
+.is-drag-phase .layer-object {
+    will-change: transform;
+}
+
+@keyframes subtle-float {
+    from {
+        transform:
+            translate3d(
+                var(--drag-x, 0px),
+                calc(var(--drag-y, 0px) - var(--float-distance, 4px)),
+                0
+            )
+            rotate(var(--object-rotation));
+    }
+
+    to {
+        transform:
+            translate3d(
+                var(--drag-x, 0px),
+                calc(var(--drag-y, 0px) + var(--float-distance, 4px)),
+                0
+            )
+            rotate(var(--object-rotation));
+    }
 }
 
 .custom-cursor {
@@ -142,11 +210,28 @@ body {
     transform-origin: 12px 12px;
 }
 
-.custom-cursor.is-key .custom-cursor__image--default {
+.custom-cursor__image--hand,
+.custom-cursor__image--grab {
+    top: 10px;
+    left: 10px;
+    opacity: 0;
+}
+
+.custom-cursor.is-key .custom-cursor__image--default,
+.custom-cursor.is-hand .custom-cursor__image--default,
+.custom-cursor.is-grabbing .custom-cursor__image--default {
     opacity: 0;
 }
 
 .custom-cursor.is-key .custom-cursor__image--key {
+    opacity: 1;
+}
+
+.custom-cursor.is-hand .custom-cursor__image--hand {
+    opacity: 1;
+}
+
+.custom-cursor.is-grabbing .custom-cursor__image--grab {
     opacity: 1;
 }
 
@@ -157,6 +242,10 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .layer-object {
+        animation: none;
+    }
+
     .custom-cursor__image {
         transition: none;
     }
