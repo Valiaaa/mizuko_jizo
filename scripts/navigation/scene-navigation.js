@@ -33,7 +33,7 @@
     };
 
     // The main story is a sequence; each door room is a branch of the hall.
-    const mainStory = ['falling', 'next', 'hell-story', 'hell-accusation', 'doors'];
+    const mainStory = ['falling', 'next', 'doors'];
     const step = (direction) => {
         const experience = window.mizukoExperience;
         const scene = experience.getScene();
@@ -51,6 +51,9 @@
                 return goTo('door-4');
             }
             return false;
+        }
+        if (scene === 'hell-story' || scene === 'hell-accusation') {
+            return goTo(direction < 0 ? 'next' : 'doors');
         }
         const index = mainStory.indexOf(scene);
         if (index < 0) return false;
