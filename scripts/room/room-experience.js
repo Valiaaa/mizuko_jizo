@@ -826,11 +826,15 @@
             const shouldReset = url.searchParams.get('reset') === '1';
             const phaseOverride = Number(url.searchParams.get('phase'));
             const sceneOverride = url.searchParams.get('scene');
+            const extendedScenePattern = /^doors$|^door-[1-4]$/;
             let saved = null;
 
             try {
                 if (shouldReset) {
                     window.localStorage.removeItem(storageKey);
+                    window.localStorage.removeItem(
+                        'mizuko-door-progress-v1'
+                    );
                 } else {
                     saved = JSON.parse(
                         window.localStorage.getItem(storageKey)
@@ -854,11 +858,21 @@
                 Number.isInteger(saved.phase) &&
                 saved.phase >= 1 &&
                 saved.phase <= finalPhase;
+            const extendedSceneOverride =
+                extendedScenePattern.test(sceneOverride ?? '');
+            const savedExtendedScene =
+                extendedScenePattern.test(saved?.scene ?? '');
+            window.mizukoInitialSceneOverride =
+                sceneOverride ||
+                (!hasPhaseOverride ? saved?.scene : null) ||
+                null;
             const sceneNeedsFinalRoom =
                 sceneOverride === 'falling' ||
                 sceneOverride === 'next' ||
+                extendedSceneOverride ||
                 saved?.scene === 'falling' ||
-                saved?.scene === 'next';
+                saved?.scene === 'next' ||
+                savedExtendedScene;
             const restoredPhase = sceneNeedsFinalRoom ?
                 finalPhase :
                 hasPhaseOverride ?
@@ -890,9 +904,11 @@
             const shouldEnterFalling =
                 sceneOverride === 'falling' ||
                 sceneOverride === 'next' ||
+                extendedSceneOverride ||
                 (!hasPhaseOverride && (
                     saved?.scene === 'falling' ||
-                    saved?.scene === 'next'
+                    saved?.scene === 'next' ||
+                    savedExtendedScene
                 )) ||
                 (
                     !hasPhaseOverride &&
@@ -916,7 +932,11 @@
 
                 if (
                     sceneOverride === 'next' ||
-                    (!hasPhaseOverride && saved?.scene === 'next')
+                    extendedSceneOverride ||
+                    (!hasPhaseOverride && (
+                        saved?.scene === 'next' ||
+                        savedExtendedScene
+                    ))
                 ) {
                     currentScene = 'next';
                     document.body.classList.remove(

@@ -1052,16 +1052,6 @@ body.is-hell-accusing .hell-story__accusation {
     transition: opacity 900ms ease;
 }
 
-.door-section__image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-drag: none;
-}
-
 body.is-door-scene .door-section {
     opacity: 1;
     pointer-events: auto;
@@ -1070,6 +1060,277 @@ body.is-door-scene .door-section {
 body.is-door-scene .next-scene {
     opacity: 0;
     pointer-events: none;
+}
+
+.door-hall {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    background: #fff;
+    opacity: 1;
+    place-items: center;
+    transition:
+        opacity 620ms ease,
+        visibility 0s linear 0s;
+}
+
+body.is-door-room .door-hall {
+    opacity: 0;
+    pointer-events: none;
+    transition:
+        opacity 520ms ease,
+        visibility 0s linear 520ms;
+    visibility: hidden;
+}
+
+.door-row {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: min(72vw, 1080px);
+    gap: clamp(34px, 4vw, 82px);
+    transform: translateY(-2vh);
+}
+
+.door-third-stack {
+    position: relative;
+    width: min(15vw, 29vh);
+}
+
+.door-card {
+    --door-open-scale: 1;
+    --door-open-skew: 0deg;
+    position: relative;
+    flex: 0 0 min(15vw, 29vh);
+    display: block;
+    width: min(15vw, 29vh);
+    aspect-ratio: 406 / 704;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+    perspective: 900px;
+}
+
+.door-third-stack .door-card {
+    width: 100%;
+}
+
+.door-card__void {
+    position: absolute;
+    inset: 3.5% 4.5% 2.5%;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 50% 45%, #171313, #020202 70%);
+    box-shadow: inset 0 0 36px rgba(0, 0, 0, 0.95);
+}
+
+.door-card__still,
+.door-card__motion {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    transform-origin: 8% 50%;
+    transition:
+        filter 320ms ease,
+        opacity 140ms linear,
+        transform 720ms cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.door-card__motion {
+    z-index: 2;
+    opacity: 0;
+}
+
+.door-card.is-previewing .door-card__still {
+    opacity: 0;
+}
+
+.door-card.is-previewing .door-card__motion {
+    opacity: 1;
+}
+
+.door-card.is-visited .door-card__still {
+    filter: brightness(0.76) contrast(1.12);
+    transform: perspective(900px) scaleX(0.3) skewY(-4deg);
+}
+
+.door-card.is-visited:is(:hover, :focus-visible) .door-card__still {
+    filter: brightness(0.9) contrast(1.08);
+    transform:
+        perspective(900px)
+        translateX(3%)
+        scaleX(0.35)
+        skewY(-2deg);
+}
+
+.door-card__visited {
+    position: absolute;
+    right: 9%;
+    bottom: -2.2em;
+    left: 9%;
+    color: rgba(25, 20, 20, 0.46);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(11px, 0.9vw, 15px);
+    letter-spacing: 0.24em;
+    opacity: 0;
+    text-align: center;
+    transition: opacity 280ms ease;
+}
+
+.door-card.is-visited .door-card__visited {
+    opacity: 1;
+}
+
+.door-card:focus-visible::after,
+.door-reflection:focus-visible::after {
+    position: absolute;
+    inset: -8px;
+    border: 1px solid rgba(32, 25, 25, 0.52);
+    content: '';
+}
+
+.door-reflection {
+    position: absolute;
+    top: calc(100% + clamp(28px, 4vh, 52px));
+    left: 50%;
+    z-index: 0;
+    display: block;
+    width: 82%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-50%) scaleY(0.45);
+    transform-origin: 50% 0;
+    transition:
+        opacity 900ms ease,
+        transform 1100ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.door-reflection img {
+    display: block;
+    width: 100%;
+    height: auto;
+    filter: contrast(1.12);
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body.has-fourth-door .door-reflection {
+    opacity: 0.7;
+    pointer-events: auto;
+    transform: translateX(-50%) scaleY(1);
+}
+
+body.has-fourth-door .door-reflection:is(:hover, :focus-visible) {
+    opacity: 0.92;
+    transform: translateX(-50%) scaleY(1.04);
+}
+
+.door-room {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    opacity: 0;
+    overflow: hidden;
+    place-items: center;
+    pointer-events: none;
+    transform: scale(1.025);
+    transition:
+        opacity 720ms ease,
+        transform 1000ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.door-room[data-room='1'] {
+    background:
+        radial-gradient(circle at 50% 42%, #332323, #080606 68%);
+    color: #eee4df;
+}
+
+.door-room[data-room='2'] {
+    background:
+        linear-gradient(135deg, #17191a, #050606 72%);
+    color: #e7e8e2;
+}
+
+.door-room[data-room='3'] {
+    background:
+        radial-gradient(circle at 50% 40%, #d9d4ca, #aaa49a 120%);
+    color: #221e1b;
+}
+
+.door-room[data-room='4'] {
+    background:
+        radial-gradient(ellipse at 50% 100%, #390707, #050000 62%);
+    color: #bc1a16;
+}
+
+.door-room.is-active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: scale(1);
+}
+
+.door-room__placeholder {
+    width: min(78vw, 720px);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    text-align: center;
+}
+
+.door-room__placeholder span {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: clamp(11px, 0.9vw, 15px);
+    letter-spacing: 0.42em;
+    opacity: 0.52;
+}
+
+.door-room__placeholder h2 {
+    margin: 0;
+    font-family: 'ChillHuoFangSongConBold', serif;
+    font-size: clamp(34px, 5vw, 78px);
+    font-weight: bold;
+    letter-spacing: 0.12em;
+}
+
+.door-room__placeholder p {
+    margin: 1.2rem 0 2.8rem;
+    font-size: clamp(14px, 1.35vw, 22px);
+    letter-spacing: 0.16em;
+    opacity: 0.62;
+}
+
+.door-room__placeholder button {
+    padding: 0.85em 1.5em;
+    border: 1px solid currentColor;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    letter-spacing: 0.14em;
+    opacity: 0.7;
+    transition:
+        opacity 220ms ease,
+        transform 320ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.door-room__placeholder button:is(:hover, :focus-visible) {
+    opacity: 1;
+    transform: translateY(-2px);
 }
 
 @keyframes falling-scroll-pulse {
