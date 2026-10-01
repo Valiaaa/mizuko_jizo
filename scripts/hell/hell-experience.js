@@ -15,6 +15,12 @@
         ...(doorScene?.querySelectorAll('.door-card') ?? [])
     ];
     const doorReflection = doorScene?.querySelector('.door-reflection');
+    const doorReflectionAnimations = [
+        ...(doorReflection?.querySelectorAll(
+            '.door-reflection__animation'
+        ) ?? [])
+    ];
+    const doorReflectionAnimation = doorReflectionAnimations[0];
     const doorRooms = [
         ...(doorScene?.querySelectorAll('.door-room') ?? [])
     ];
@@ -29,6 +35,9 @@
     const visitedDoors = new Set();
     let storyPhase = 0;
     let activeDoor = null;
+    let reflectionFrame = 0;
+    let reflectionLastTime = null;
+    let reflectionFrameBudget = 0;
 
     const startMotion = (item) => {
         const motion = item.querySelector('.hell-object__motion');
@@ -59,6 +68,43 @@
 
     const hasVisitedEveryDoor = () =>
         [1, 2, 3].every((door) => visitedDoors.has(door));
+
+    const animateDoorReflection = (timestamp) => {
+        if (!doorReflectionAnimation || !doorReflection) {
+            return;
+        }
+
+        if (reflectionLastTime === null) {
+            reflectionLastTime = timestamp;
+        }
+
+        const elapsed = Math.min(timestamp - reflectionLastTime, 250);
+        const isAccelerated = doorReflection.matches(
+            ':hover, :focus-visible'
+        );
+        const frameDuration = isAccelerated ? 70 : 90;
+        let didAdvance = false;
+
+        reflectionLastTime = timestamp;
+        reflectionFrameBudget += elapsed;
+
+        while (reflectionFrameBudget >= frameDuration) {
+            reflectionFrame = (reflectionFrame + 1) % 16;
+            reflectionFrameBudget -= frameDuration;
+            didAdvance = true;
+        }
+
+        if (didAdvance) {
+            const framePosition = (reflectionFrame / 15) * 100;
+            doorReflectionAnimations.forEach((animationLayer) => {
+                animationLayer.style.backgroundPosition =
+                    `${framePosition}% 0`;
+                animationLayer.dataset.frame = String(reflectionFrame);
+            });
+        }
+
+        window.requestAnimationFrame(animateDoorReflection);
+    };
 
     const saveDoorProgress = () => {
         try {
@@ -123,32 +169,6 @@
         }
     };
 
-    const stopDoorMotion = (card) => {
-        const motion = card.querySelector('.door-card__motion');
-
-        card.classList.remove('is-previewing');
-
-        if (motion) {
-            motion.removeAttribute('src');
-        }
-    };
-
-    const startDoorMotion = (card) => {
-        if (card.classList.contains('is-visited')) {
-            return;
-        }
-
-        const motion = card.querySelector('.door-card__motion');
-        const motionSource = card.dataset.motion;
-
-        if (!motion || !motionSource) {
-            return;
-        }
-
-        motion.src = `${motionSource}?play=${Date.now()}`;
-        card.classList.add('is-previewing');
-    };
-
     const renderDoorProgress = () => {
         doorCards.forEach((card) => {
             const doorNumber = Number(card.dataset.door);
@@ -158,10 +178,6 @@
                 'aria-label',
                 `${isVisited ? '再次进入' : '进入'}第${doorNumber}扇门`
             );
-
-            if (isVisited) {
-                stopDoorMotion(card);
-            }
         });
 
         const hasFourthDoor = hasVisitedEveryDoor();
@@ -199,7 +215,7 @@
             room.setAttribute('aria-hidden', 'true');
         });
         renderDoorProgress();
-        setEyeCursor(true);
+        setEyeCursor(false);
 
         if (saveScene) {
             window.mizukoExperience?.setScene('doors');
@@ -221,7 +237,6 @@
         }
 
         activeDoor = doorNumber;
-        doorCards.forEach(stopDoorMotion);
         renderDoorProgress();
         document.body.classList.add('is-door-scene', 'is-door-room');
         doorScene?.setAttribute('aria-hidden', 'false');
@@ -231,7 +246,7 @@
             room.classList.toggle('is-active', isActive);
             room.setAttribute('aria-hidden', isActive ? 'false' : 'true');
         });
-        setEyeCursor(true);
+        setEyeCursor(false);
 
         if (options.saveScene !== false) {
             window.mizukoExperience?.setScene(`door-${doorNumber}`);
@@ -314,14 +329,6 @@
     });
 
     doorCards.forEach((card) => {
-        card.addEventListener('pointerenter', () => {
-            startDoorMotion(card);
-        });
-        card.addEventListener('pointerleave', () => {
-            stopDoorMotion(card);
-        });
-        card.addEventListener('focus', () => startDoorMotion(card));
-        card.addEventListener('blur', () => stopDoorMotion(card));
         card.addEventListener('click', () => {
             openDoorRoom(Number(card.dataset.door));
         });
@@ -347,6 +354,13 @@
             resetStory();
         }
     });
+
+    if (doorReflectionAnimation) {
+        doorReflectionAnimations.forEach((animationLayer) => {
+            animationLayer.dataset.frame = '0';
+        });
+        window.requestAnimationFrame(animateDoorReflection);
+    }
 
     restoreDoorProgress();
     renderDoorProgress();
