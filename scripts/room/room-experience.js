@@ -659,6 +659,12 @@
             }
 
             if (currentScene !== 'room') {
+                const offering = currentScene === 'door-2' &&
+                    document.elementFromPoint(clientX, clientY)?.closest('.offering-symbol');
+                if (offering) {
+                    setCursorMode(document.body.classList.contains('is-offering-grabbing') ? 'grabbing' : 'hand');
+                    return;
+                }
                 setCursorMode('default');
                 return;
             }

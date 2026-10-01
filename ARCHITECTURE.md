@@ -14,6 +14,8 @@ src/
 │   │   └── falling.html               # 下坠段落与地狱场景
 │   ├── doors/
 │   │   └── doors.html                 # 门厅、倒影入口与独立房间壳层
+│   ├── offerings/
+│   │   └── offerings.html             # 第二房间：环绕供品、换装与祈愿文字
 │   └── searching/
 │       └── searching.html             # 第一房间：18 尊佛像与原文逐段显现
 └── components/
@@ -27,6 +29,8 @@ scripts/
 │   └── room-experience.js             # 房间阶段、拖拽、过渡与进度
 ├── falling/
 │   └── falling-experience.js          # 下坠物品、角色 Cursor 与黑洞
+├── offerings/
+│   └── offerings-experience.js        # 供品选择、换装和抓取光标
 └── hell/
     └── hell-experience.js             # 地狱叙事、门状态与房间路由
 
@@ -95,3 +99,5 @@ Test 进度独立写入 `mizuko-room-test-progress-v1` 和 `mizuko-door-test-pro
 第一房间使用 `Page5.1_寻找_asset` 的背景和 18 尊佛像，文字按 `p5.1_text.pages` 的顺序排列。鼠标悬停或键盘聚焦时原位显示段落，离开后恢复佛像。第 15 尊水子变成黑色剪影，点击返回门厅；第 16、17 段中的“水子”也可以返回。触屏点按显示文字，水子第一次点按显现、再次点按返回。窄屏改为三列，可纵向滚动。
 
 地狱质问页的微弱闪烁由 `hell-experience.js` 更新模糊与光晕参数；离开该页、切到后台或启用减少动态效果时停止。
+
+第二房间使用 `Page5.2_供奉_asset` 的六种贡品、七张水子石像和六张原始手写文字。默认显示 `Mizuko_Plain`，右侧留空；点击贡品后淡入对应装扮及文字。灰色点圈由 `offering-rings.svg` 绘制，100 秒转一周；贡品 160 秒绕中心一周，自身保持直立，hover 或键盘聚焦时暂停环绕。Hover 使用手势光标和轻微抬起／放大，按下时使用抓取手势。点击中央水子返回门厅，每次重新进入恢复 plain。离开房间暂停旋转，减少动态效果设置下停用旋转。
