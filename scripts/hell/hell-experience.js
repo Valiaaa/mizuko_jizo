@@ -28,7 +28,8 @@
         ...(doorScene?.querySelectorAll('[data-return-doors]') ?? [])
     ];
     const customCursor = document.querySelector('.custom-cursor');
-    const doorStorageKey = 'mizuko-door-progress-v1';
+    const doorStorageKey = window.mizukoNavigation.testMode ?
+        'mizuko-door-test-progress-v1' : 'mizuko-door-progress-v1';
     const doorStorageVersion = 1;
     const searchParams = new URLSearchParams(window.location.search);
     const initialScene = window.mizukoInitialSceneOverride;
@@ -38,6 +39,34 @@
     let reflectionFrame = 0;
     let reflectionLastTime = null;
     let reflectionFrameBudget = 0;
+    const accusation = scene.querySelector('.hell-story__accusation');
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let emberTimer = null;
+
+    const stopEmbers = () => {
+        window.clearTimeout(emberTimer);
+        emberTimer = null;
+        accusation?.style.removeProperty('--ember-blur');
+        accusation?.style.removeProperty('--ember-glow');
+        accusation?.style.removeProperty('--ember-light');
+    };
+
+    const flickerEmbers = () => {
+        window.clearTimeout(emberTimer);
+        emberTimer = null;
+        if (!accusation || reducedMotion.matches || document.hidden ||
+            !document.body.classList.contains('is-hell-accusing')) {
+            stopEmbers();
+            return;
+        }
+        accusation.style.setProperty('--ember-blur', `${0.25 + Math.random() * 0.4}px`);
+        accusation.style.setProperty('--ember-glow', `${4 + Math.random() * 4}px`);
+        accusation.style.setProperty('--ember-light', String(0.28 + Math.random() * 0.18));
+        emberTimer = window.setTimeout(flickerEmbers, 180 + Math.random() * 380);
+    };
+
+    reducedMotion.addEventListener('change', flickerEmbers);
+    document.addEventListener('visibilitychange', flickerEmbers);
 
     const startMotion = (item) => {
         const motion = item.querySelector('.hell-object__motion');
@@ -166,6 +195,10 @@
                     }
                 });
             }
+            saveDoorProgress();
+            const url = new URL(window.location.href);
+            url.searchParams.delete('visited');
+            window.history.replaceState({}, '', url);
         }
     };
 
@@ -204,13 +237,21 @@
     };
 
     const showDoorHall = (options = {}) => {
+        stopEmbers();
+        objects.forEach(stopMotion);
+        storyPhase = 3;
+        document.body.classList.remove('is-hell-story', 'is-hell-accusing');
+        story?.setAttribute('aria-hidden', 'true');
+        scene.setAttribute('aria-hidden', 'true');
         const saveScene = options.saveScene !== false;
         activeDoor = null;
         document.body.classList.add('is-door-scene');
         document.body.classList.remove('is-door-room');
         doorScene?.setAttribute('aria-hidden', 'false');
         doorHall?.setAttribute('aria-hidden', 'false');
+        if (doorHall) doorHall.inert = false;
         doorRooms.forEach((room) => {
+            room.inert = true;
             room.classList.remove('is-active');
             room.setAttribute('aria-hidden', 'true');
         });
@@ -241,10 +282,14 @@
         document.body.classList.add('is-door-scene', 'is-door-room');
         doorScene?.setAttribute('aria-hidden', 'false');
         doorHall?.setAttribute('aria-hidden', 'true');
+        if (doorHall) doorHall.inert = true;
         doorRooms.forEach((room) => {
             const isActive = Number(room.dataset.room) === doorNumber;
+            room.inert = !isActive;
+            room.tabIndex = -1;
             room.classList.toggle('is-active', isActive);
             room.setAttribute('aria-hidden', isActive ? 'false' : 'true');
+            if (isActive && options.saveScene !== false) room.focus({ preventScroll: true });
         });
         setEyeCursor(false);
 
@@ -261,16 +306,21 @@
         story?.setAttribute('aria-hidden', 'false');
         storyAdvance?.setAttribute('aria-label', '继续倾听');
         setEyeCursor(true);
+        window.mizukoExperience?.setScene('hell-story');
     };
 
     const showAccusation = () => {
         storyPhase = 2;
-        document.body.classList.add('is-hell-accusing');
+        document.body.classList.add('is-hell-story', 'is-hell-accusing');
+        story?.setAttribute('aria-hidden', 'false');
+        flickerEmbers();
         storyAdvance?.setAttribute('aria-label', '走向三扇门');
         setEyeCursor(true);
+        window.mizukoExperience?.setScene('hell-accusation');
     };
 
     const enterDoorScene = () => {
+        stopEmbers();
         storyPhase = 3;
         document.body.classList.remove(
             'is-hell-story',
@@ -282,6 +332,7 @@
     };
 
     const resetStory = () => {
+        stopEmbers();
         storyPhase = 0;
         document.body.classList.remove(
             'is-hell-story',
@@ -292,10 +343,24 @@
         story?.setAttribute('aria-hidden', 'true');
         doorScene?.setAttribute('aria-hidden', 'true');
         doorRooms.forEach((room) => {
+            room.inert = true;
             room.classList.remove('is-active');
             room.setAttribute('aria-hidden', 'true');
         });
         setEyeCursor(false);
+    };
+
+    const showScene = (target) => {
+        const doorMatch = /^door-([1-4])$/.exec(target);
+        if (target === 'door-4' && !hasVisitedEveryDoor()) return false;
+        if (!['next', 'hell-story', 'hell-accusation', 'doors'].includes(target) && !doorMatch) return false;
+        resetStory();
+        window.mizukoFallingExperience.enterNextScene({ immediate: true });
+        if (target === 'hell-story') openNarrative();
+        else if (target === 'hell-accusation') showAccusation();
+        else if (target === 'doors') showDoorHall();
+        else if (doorMatch) openDoorRoom(Number(doorMatch[1]));
+        return true;
     };
 
     mizuko?.addEventListener('pointerenter', () => {
@@ -339,17 +404,39 @@
     });
 
     doorReturnButtons.forEach((button) => {
-        button.addEventListener('click', () => showDoorHall());
+        button.addEventListener('pointerenter', () => setEyeCursor(true));
+        button.addEventListener('pointerleave', () => setEyeCursor(false));
+        button.addEventListener('focus', () => setEyeCursor(true));
+        button.addEventListener('blur', () => setEyeCursor(false));
+        button.addEventListener('click', (event) => {
+            if (button.matches('.searching-sculpture--mizuko') &&
+                event.pointerType === 'touch' &&
+                !button.classList.contains('is-revealed')) {
+                button.classList.add('is-revealed');
+                return;
+            }
+            const returningDoor = activeDoor;
+            showDoorHall();
+            doorCards.find((card) => Number(card.dataset.door) === returningDoor)?.focus({ preventScroll: true });
+        });
+    });
+
+    document.querySelectorAll('.searching-sculpture').forEach((sculpture) => {
+        sculpture.addEventListener('click', (event) => {
+            if (event.pointerType !== 'touch' || event.target.closest('[data-return-doors]')) return;
+            sculpture.classList.toggle('is-revealed');
+        });
     });
 
     window.addEventListener('mizuko:scenechange', (event) => {
-        if (event.detail?.scene !== 'next') {
+        if (!['next', 'hell-story', 'hell-accusation'].includes(event.detail?.scene)) {
             objects.forEach(stopMotion);
         }
 
         if (
             event.detail?.scene === 'room' ||
-            event.detail?.scene === 'falling'
+            event.detail?.scene === 'falling' ||
+            event.detail?.scene === 'next'
         ) {
             resetStory();
         }
@@ -364,26 +451,9 @@
 
     restoreDoorProgress();
     renderDoorProgress();
-
-    if (initialScene === 'doors') {
-        storyPhase = 3;
-        scene.setAttribute('aria-hidden', 'true');
-        showDoorHall({ saveScene: false });
-    } else {
-        const initialDoorMatch = /^door-([1-4])$/.exec(
-            initialScene ?? ''
-        );
-
-        if (initialDoorMatch) {
-            const initialDoor = Number(initialDoorMatch[1]);
-
-            if (initialDoor === 4) {
-                [1, 2, 3].forEach((door) => visitedDoors.add(door));
-            }
-
-            storyPhase = 3;
-            scene.setAttribute('aria-hidden', 'true');
-            openDoorRoom(initialDoor, { saveScene: false });
-        }
+    window.mizukoHellExperience = { showScene, hasVisitedEveryDoor };
+    if (initialScene === 'door-4') {
+        [1, 2, 3].forEach((door) => visitedDoors.add(door));
     }
+    showScene(initialScene);
 })();

@@ -106,6 +106,7 @@
     let paintedY = pointerY;
     let cursorFrame = 0;
     let abyssTimer = 0;
+    let nextSceneTimer = 0;
     let scrollHintTimer = 0;
     let isInsideAbyss = false;
 
@@ -152,8 +153,11 @@
     const enterNextScene = (options = {}) => {
         const immediate = options?.immediate === true;
         window.clearTimeout(abyssTimer);
+        window.clearTimeout(nextSceneTimer);
         abyssTimer = 0;
         isInsideAbyss = false;
+        abyssHole.classList.remove('is-armed');
+        fallingCursor.classList.remove('is-pulled');
         document.body.classList.add('is-entering-next-scene');
         nextScene.setAttribute('aria-hidden', 'false');
 
@@ -176,7 +180,7 @@
         if (immediate) {
             finishTransition();
         } else {
-            window.setTimeout(finishTransition, 420);
+            nextSceneTimer = window.setTimeout(finishTransition, 420);
         }
     };
 
@@ -247,9 +251,17 @@
 
     window.addEventListener('mizuko:scenechange', (event) => {
         if (event.detail?.scene !== 'falling') {
+            window.clearTimeout(abyssTimer);
+            window.clearTimeout(nextSceneTimer);
+            isInsideAbyss = false;
+            abyssHole.classList.remove('is-armed');
+            fallingCursor.classList.remove('is-pulled');
             hideScrollHint();
             return;
         }
+
+        window.clearTimeout(abyssTimer);
+        window.clearTimeout(nextSceneTimer);
 
         paintedX = pointerX;
         paintedY = pointerY;

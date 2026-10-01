@@ -10,16 +10,11 @@
         const nextScene = document.querySelector('#next-scene');
         const roomCount = 6;
         const finalPhase = roomCount + 1;
-        const storageKey = 'mizuko-room-progress-v3';
+        const navigation = window.mizukoNavigation;
+        const storageKey = navigation.testMode ?
+            'mizuko-room-test-progress-v1' : 'mizuko-room-progress-v3';
         const storageVersion = 1;
         const alphaThreshold = 24;
-        const initialSearchParams = new URLSearchParams(
-            window.location.search
-        );
-        const testMode =
-            initialSearchParams.get('test') === '1' ||
-            initialSearchParams.has('phase') ||
-            initialSearchParams.has('scene');
         const roomPolygon = [
             [958, 154],
             [1314, 322],
@@ -36,6 +31,8 @@
         let convergenceProgress = 0;
         let convergenceComplete = false;
         let convergenceTransitionTimer = 0;
+        let fallingSceneFrame = 0;
+        let fallingSettleTimer = 0;
         let currentScene = 'room';
         let lastFallingScrollY = 0;
         let topLayerZ = 1;
@@ -492,11 +489,21 @@
         }
 
         function setScene(scene) {
+            if (scene !== 'falling') cancelFallingTransition();
             currentScene = scene;
             saveProgress();
             window.dispatchEvent(new CustomEvent('mizuko:scenechange', {
                 detail: { scene }
             }));
+        }
+
+        function cancelFallingTransition() {
+            window.cancelAnimationFrame(fallingSceneFrame);
+            window.clearTimeout(fallingSettleTimer);
+            window.clearTimeout(convergenceTransitionTimer);
+            fallingSceneFrame = 0;
+            fallingSettleTimer = 0;
+            convergenceTransitionTimer = 0;
         }
 
         function enterFallingScene(options = {}) {
@@ -508,8 +515,7 @@
                 immediate = false,
                 scrollY = lastFallingScrollY
             } = options;
-            window.clearTimeout(convergenceTransitionTimer);
-            convergenceTransitionTimer = 0;
+            cancelFallingTransition();
             currentScene = 'falling';
             lastFallingScrollY = Math.max(0, scrollY);
             fallingSection.setAttribute('aria-hidden', 'false');
@@ -521,14 +527,17 @@
 
             document.body.classList.remove(
                 'is-entering-next-scene',
-                'is-next-scene'
+                'is-next-scene',
+                'is-falling-settled'
             );
             document.body.classList.add('is-falling');
 
-            window.requestAnimationFrame(() => {
+            fallingSceneFrame = window.requestAnimationFrame(() => {
+                if (currentScene !== 'falling') return;
                 window.scrollTo(0, lastFallingScrollY);
 
-                window.setTimeout(() => {
+                fallingSettleTimer = window.setTimeout(() => {
+                    if (currentScene !== 'falling') return;
                     document.body.classList.add('is-falling-settled');
                     document.body.classList.remove(
                         'is-transition-immediate'
@@ -543,8 +552,7 @@
         }
 
         function enterRoomScene(nextPhase = finalPhase) {
-            window.clearTimeout(convergenceTransitionTimer);
-            convergenceTransitionTimer = 0;
+            cancelFallingTransition();
             currentScene = 'room';
             document.body.classList.remove(
                 'is-falling',
@@ -724,6 +732,7 @@
         }
 
         function saveProgress() {
+            navigation.syncLocation(currentScene, phase);
             try {
                 const progress = {
                     version: storageVersion,
@@ -823,132 +832,46 @@
 
         function restoreProgress() {
             const url = new URL(window.location.href);
-            const shouldReset = url.searchParams.get('reset') === '1';
             const phaseOverride = Number(url.searchParams.get('phase'));
-            const sceneOverride = url.searchParams.get('scene');
-            const extendedScenePattern = /^doors$|^door-[1-4]$/;
+            const hasPhaseOverride = Number.isInteger(phaseOverride) &&
+                phaseOverride >= 1 && phaseOverride <= finalPhase;
+            const sceneOverride = navigation.resolveScene(url.searchParams.get('scene'));
             let saved = null;
-
             try {
-                if (shouldReset) {
+                if (url.searchParams.get('reset') === '1') {
                     window.localStorage.removeItem(storageKey);
-                    window.localStorage.removeItem(
-                        'mizuko-door-progress-v1'
-                    );
+                    window.localStorage.removeItem(navigation.testMode ?
+                        'mizuko-door-test-progress-v1' : 'mizuko-door-progress-v1');
                 } else {
-                    saved = JSON.parse(
-                        window.localStorage.getItem(storageKey)
-                    );
+                    saved = JSON.parse(window.localStorage.getItem(storageKey));
                 }
             } catch {
                 saved = null;
             }
-
-            if (shouldReset) {
-                url.searchParams.delete('reset');
-                window.history.replaceState({}, '', url);
-            }
-
-            const hasPhaseOverride =
-                Number.isInteger(phaseOverride) &&
-                phaseOverride >= 1 &&
-                phaseOverride <= finalPhase;
-            const hasSavedProgress =
-                saved?.version === storageVersion &&
-                Number.isInteger(saved.phase) &&
-                saved.phase >= 1 &&
-                saved.phase <= finalPhase;
-            const extendedSceneOverride =
-                extendedScenePattern.test(sceneOverride ?? '');
-            const savedExtendedScene =
-                extendedScenePattern.test(saved?.scene ?? '');
-            window.mizukoInitialSceneOverride =
-                sceneOverride ||
-                (!hasPhaseOverride ? saved?.scene : null) ||
-                null;
-            const sceneNeedsFinalRoom =
-                sceneOverride === 'falling' ||
-                sceneOverride === 'next' ||
-                extendedSceneOverride ||
-                saved?.scene === 'falling' ||
-                saved?.scene === 'next' ||
-                savedExtendedScene;
-            const restoredPhase = sceneNeedsFinalRoom ?
-                finalPhase :
-                hasPhaseOverride ?
-                    phaseOverride :
-                    hasSavedProgress ? saved.phase : 1;
-            const restoredLayers =
-                !hasPhaseOverride &&
-                restoredPhase === finalPhase &&
-                hasSavedProgress ?
-                    saved.layers :
-                    null;
-
-            if (hasPhaseOverride) {
-                url.searchParams.delete('phase');
-                url.searchParams.set('test', '1');
-                window.history.replaceState({}, '', url);
-            }
-
-            showPhase(
-                restoredPhase,
-                restoredLayers,
-                !hasPhaseOverride &&
-                restoredPhase === finalPhase &&
-                hasSavedProgress ?
-                    saved.convergence :
-                    null
-            );
-
-            const shouldEnterFalling =
-                sceneOverride === 'falling' ||
-                sceneOverride === 'next' ||
-                extendedSceneOverride ||
-                (!hasPhaseOverride && (
-                    saved?.scene === 'falling' ||
-                    saved?.scene === 'next' ||
-                    savedExtendedScene
-                )) ||
-                (
-                    !hasPhaseOverride &&
-                    restoredPhase === finalPhase &&
-                    Boolean(saved?.convergence?.complete)
-                );
-
-            if (sceneOverride) {
-                url.searchParams.delete('scene');
-                url.searchParams.set('test', '1');
-                window.history.replaceState({}, '', url);
-            }
-
-            if (shouldEnterFalling) {
-                lastFallingScrollY = Number.isFinite(saved?.scrollY) ?
-                    saved.scrollY : 0;
-                enterFallingScene({
-                    immediate: true,
-                    scrollY: lastFallingScrollY
-                });
-
-                if (
-                    sceneOverride === 'next' ||
-                    extendedSceneOverride ||
-                    (!hasPhaseOverride && (
-                        saved?.scene === 'next' ||
-                        savedExtendedScene
-                    ))
-                ) {
-                    currentScene = 'next';
-                    document.body.classList.remove(
-                        'is-falling',
-                        'is-falling-settled'
-                    );
-                    document.body.classList.add('is-next-scene');
-                    nextScene?.setAttribute('aria-hidden', 'false');
-                    window.requestAnimationFrame(() => {
-                        nextScene?.scrollIntoView({ block: 'start' });
-                    });
-                }
+            url.searchParams.delete('reset');
+            window.history.replaceState({}, '', url);
+            const hasSavedProgress = saved?.version === storageVersion &&
+                Number.isInteger(saved.phase) && saved.phase >= 1 && saved.phase <= finalPhase;
+            const savedScene = hasSavedProgress ? navigation.resolveScene(saved.scene) : null;
+            let restoredScene = sceneOverride || (hasPhaseOverride ? 'room' : savedScene) || 'room';
+            if (!sceneOverride && !hasPhaseOverride && restoredScene === 'room' &&
+                saved?.convergence?.complete) restoredScene = 'falling';
+            const restoredPhase = restoredScene !== 'room' ? finalPhase :
+                hasPhaseOverride ? phaseOverride : hasSavedProgress ? saved.phase : 1;
+            window.mizukoInitialSceneOverride = restoredScene;
+            showPhase(restoredPhase,
+                !hasPhaseOverride && hasSavedProgress ? saved.layers : null,
+                !hasPhaseOverride && hasSavedProgress ? saved.convergence : null);
+            lastFallingScrollY = Number.isFinite(saved?.scrollY) ? Math.max(0, saved.scrollY) : 0;
+            if (restoredScene === 'falling') {
+                enterFallingScene({ immediate: true, scrollY: lastFallingScrollY });
+            } else if (restoredScene !== 'room') {
+                document.body.classList.add('is-next-scene');
+                fallingSection?.setAttribute('aria-hidden', 'true');
+                nextScene?.setAttribute('aria-hidden', 'false');
+                setScene(restoredScene);
+            } else {
+                setScene('room');
             }
         }
 
@@ -1118,66 +1041,6 @@
             }
         });
 
-        window.addEventListener('keydown', (event) => {
-            if (
-                !testMode ||
-                event.altKey ||
-                event.ctrlKey ||
-                event.metaKey ||
-                event.shiftKey
-            ) {
-                return;
-            }
-
-            const direction =
-                event.key === 'ArrowLeft' ? -1 :
-                event.key === 'ArrowRight' ? 1 :
-                0;
-
-            if (!direction) {
-                return;
-            }
-
-            if (
-                (currentScene === 'room' && direction < 0 && phase === 1) ||
-                (currentScene === 'next' && direction > 0)
-            ) {
-                return;
-            }
-
-            event.preventDefault();
-
-            if (currentScene === 'room') {
-                if (direction > 0 && phase === finalPhase) {
-                    enterFallingScene({ immediate: true });
-                    return;
-                }
-
-                showPhase(phase + direction);
-                saveProgress();
-                updateCursorModeAt(-1, -1);
-                return;
-            }
-
-            if (currentScene === 'falling') {
-                if (direction < 0) {
-                    enterRoomScene(finalPhase);
-                } else {
-                    window.mizukoFallingExperience?.enterNextScene({
-                        immediate: true
-                    });
-                }
-                return;
-            }
-
-            if (currentScene === 'next' && direction < 0) {
-                enterFallingScene({
-                    immediate: true,
-                    scrollY: lastFallingScrollY
-                });
-            }
-        });
-
         // Avoid a flash when moving between phases.
         for (let index = 2; index <= roomCount; index += 1) {
             const image = new Image();
@@ -1322,6 +1185,8 @@
 
         window.mizukoExperience = {
             enterFallingScene,
+            enterRoomScene,
+            getPhase: () => phase,
             getScene: () => currentScene,
             saveProgress,
             setScene

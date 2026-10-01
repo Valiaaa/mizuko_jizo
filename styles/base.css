@@ -1006,8 +1006,11 @@ body.is-hell-story .hell-story {
     text-shadow:
         0 0 4px rgba(150, 0, 0, 0.62),
         0 0 24px rgba(90, 0, 0, 0.45);
+    filter: blur(var(--ember-blur, 0.4px))
+        drop-shadow(0 0 var(--ember-glow, 6px) rgba(196, 24, 8, var(--ember-light, 0.38)));
     transform: translate(-50%, -42%);
     transition:
+        filter 220ms ease,
         opacity 620ms ease 160ms,
         transform 900ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
 }
@@ -1250,9 +1253,129 @@ body.has-fourth-door .door-reflection:is(:hover, :focus-visible) .door-reflectio
 }
 
 .door-room[data-room='1'] {
-    background:
-        radial-gradient(circle at 50% 42%, #332323, #080606 68%);
-    color: #eee4df;
+    background: #eeeae4 url('../assets/Page5.1_寻找_asset/5.1bg.jpg') center / cover;
+    color: #171513;
+}
+
+.searching-stage {
+    width: min(100vw, 177.7778vh);
+    height: min(100vh, 56.25vw);
+    background: url('../assets/Page5.1_寻找_asset/5.1bg.jpg') center / 100% 100%;
+}
+
+.searching-grid {
+    box-sizing: border-box;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    width: 100%;
+    height: 100%;
+    padding: 0.8% 4.2% 2.7%;
+    column-gap: 2.6%;
+    row-gap: 0.5%;
+}
+
+.searching-sculpture {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    place-items: center;
+    font-family: 'ChillHuoFangSongConBold', 'Songti TC', serif;
+    text-align: left;
+    cursor: var(--cursor-default);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.searching-sculpture img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    transition: opacity 240ms ease, filter 300ms ease;
+}
+
+.searching-sculpture__copy {
+    position: absolute;
+    width: 88%;
+    font-size: clamp(13px, 1.34vw, 27px);
+    line-height: 1.48;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 240ms ease, visibility 240ms;
+}
+
+.searching-sculpture:is(:hover, :focus-within, .is-revealed) img {
+    opacity: 0;
+}
+
+.searching-sculpture:is(:hover, :focus-within, .is-revealed) .searching-sculpture__copy {
+    opacity: 1;
+    visibility: visible;
+}
+
+.searching-sculpture:focus-visible {
+    outline: 1px dashed #71645a;
+    outline-offset: 2px;
+}
+
+.searching-sculpture--mizuko:is(:hover, :focus-within, .is-revealed) img {
+    opacity: 1;
+    filter: brightness(0);
+}
+
+.searching-sculpture--mizuko .searching-sculpture__copy {
+    width: 65%;
+    color: #eee6da;
+    text-align: center;
+}
+
+.searching-word {
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+}
+
+.searching-word:is(:hover, :focus-visible) {
+    color: #000;
+    text-shadow: 0 0 1px #000;
+}
+
+@media (max-aspect-ratio: 1/1) {
+    .door-room[data-room='1'] {
+        overflow-y: auto;
+        place-items: start center;
+    }
+
+    .searching-stage {
+        width: 100%;
+        height: auto;
+        min-height: 100%;
+        background-size: cover;
+    }
+
+    .searching-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: repeat(6, minmax(220px, auto));
+        padding: 16px 4% 32px;
+        row-gap: 12px;
+    }
+
+    .searching-sculpture img {
+        max-height: 220px;
+    }
+
+    .searching-sculpture__copy {
+        font-size: clamp(14px, 3vw, 22px);
+    }
 }
 
 .door-room[data-room='2'] {
