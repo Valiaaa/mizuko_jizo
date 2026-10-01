@@ -1,0 +1,7 @@
+{
+  "name": "mizuko-jizo",
+  "private": true,
+  "scripts": {
+    "build": "node tools/build-html.mjs"
+  }
+}

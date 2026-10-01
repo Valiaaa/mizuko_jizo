@@ -27,8 +27,8 @@
 }
 
 :root {
-    --cursor-default: url('../assets/cursor/default-cursor-small.png') 12 12, auto;
-    --cursor-key: url('../assets/cursor/key-cursor-large.png') 12 12, pointer;
+    --cursor-default: url('../assets/cursor/default-cursor.png') 12 12, auto;
+    --cursor-key: url('../assets/cursor/key-cursor.png') 12 12, pointer;
 }
 
 .has-custom-cursor,
@@ -41,7 +41,23 @@ body {
     height: 100vh;
     overflow: hidden;
     margin: 0;
+    background: #000;
     cursor: var(--cursor-default);
+}
+
+body.is-falling {
+    height: auto;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+body.is-entering-next-scene,
+body.is-next-scene,
+body.is-door-scene {
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
 }
 
 #bg {
@@ -53,6 +69,20 @@ body {
     align-items: center;
     justify-content: center;
     cursor: var(--cursor-default);
+    z-index: 10;
+    opacity: 1;
+    transition: opacity 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.is-falling #bg,
+body.is-entering-next-scene #bg,
+body.is-next-scene #bg {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        opacity 850ms cubic-bezier(0.22, 1, 0.36, 1),
+        visibility 0s linear 850ms;
 }
 
 .room-stage {
@@ -74,6 +104,125 @@ body {
     -webkit-user-drag: none;
 }
 
+.convergence-field {
+    --convergence-shift: 0px;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+        opacity 500ms ease,
+        visibility 0s linear 500ms;
+}
+
+.is-drag-phase .convergence-field {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.convergence-circle {
+    position: absolute;
+    top: 50%;
+    width: 90vh;
+    height: 90vh;
+    overflow: hidden;
+    border-radius: 50%;
+    transform-origin: 50% 50%;
+    will-change: transform;
+}
+
+.convergence-circle--left {
+    left: -45vh;
+    transform:
+        translate3d(var(--convergence-shift), -50%, 0);
+}
+
+.convergence-circle--right {
+    right: -45vh;
+    transform:
+        translate3d(calc(-1 * var(--convergence-shift)), -50%, 0);
+}
+
+.convergence-circle img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: filter, opacity;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.convergence-field.is-snapping .convergence-circle {
+    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.convergence-field.is-snapping .convergence-copy {
+    transition: opacity 160ms linear 260ms;
+}
+
+.convergence-field.is-converged .convergence-circle img {
+    animation: convergence-glow 480ms ease-out both;
+}
+
+.convergence-copy {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(18px, 2.2vh, 30px);
+    line-height: 1.15;
+    letter-spacing: -8%;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    transform: translateY(-50%);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+    max-height: 40%;
+}
+
+.convergence-copy--left {
+    left: clamp(42px, 11vw, 170px);
+}
+
+.convergence-copy--right {
+    right: clamp(42px, 11vw, 170px);
+}
+
+.convergence-hint {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: serif;
+    font-size: clamp(42px, 7vh, 86px);
+    font-weight: 300;
+    line-height: 1;
+    transform: translateY(-50%);
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
+}
+
+.convergence-hint--left {
+    left: clamp(112px, 24vw, 390px);
+    animation: hint-inward-left 1700ms ease-in-out infinite;
+}
+
+.convergence-hint--right {
+    right: clamp(112px, 24vw, 390px);
+    animation: hint-inward-right 1700ms ease-in-out infinite;
+}
+
+.convergence-field.is-converged .convergence-hint {
+    opacity: 0;
+    animation: none;
+}
+
 .layer-field {
     position: absolute;
     inset: 0;
@@ -93,6 +242,7 @@ body {
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
+    transition: opacity 80ms linear;
     animation:
         subtle-float var(--float-duration, 6000ms)
         ease-in-out var(--float-delay, 0ms) infinite
@@ -154,9 +304,13 @@ body {
         transform:
             translate3d(
                 var(--drag-x, 0px),
-                calc(var(--drag-y, 0px) - var(--float-distance, 4px)),
+                calc(
+                    var(--drag-y, 0px) - var(--float-distance, 4px) +
+                    var(--convergence-scatter-y, 0px)
+                ),
                 0
             )
+            translateX(var(--convergence-scatter-x, 0px))
             rotate(var(--object-rotation));
     }
 
@@ -164,10 +318,795 @@ body {
         transform:
             translate3d(
                 var(--drag-x, 0px),
-                calc(var(--drag-y, 0px) + var(--float-distance, 4px)),
+                calc(
+                    var(--drag-y, 0px) + var(--float-distance, 4px) +
+                    var(--convergence-scatter-y, 0px)
+                ),
                 0
             )
+            translateX(var(--convergence-scatter-x, 0px))
             rotate(var(--object-rotation));
+    }
+}
+
+@keyframes hint-inward-left {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: translate3d(-7px, -50%, 0);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translate3d(7px, -50%, 0);
+    }
+}
+
+@keyframes hint-inward-right {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: translate3d(7px, -50%, 0);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translate3d(-7px, -50%, 0);
+    }
+}
+
+@keyframes convergence-glow {
+    0% {
+        filter:
+            brightness(1)
+            blur(0)
+            drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    }
+
+    55% {
+        opacity: 0.92;
+        filter:
+            brightness(1.4)
+            blur(2px)
+            drop-shadow(0 0 28px rgba(255, 255, 255, 0.72));
+    }
+
+    100% {
+        opacity: 1;
+        filter:
+            brightness(1.12)
+            blur(0)
+            drop-shadow(0 0 12px rgba(255, 255, 255, 0.28));
+    }
+}
+
+.falling-section {
+    --falling-ring-size: 90vh;
+    position: relative;
+    z-index: 5;
+    display: block;
+    min-height: 590vh;
+    overflow: clip;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    background:
+        radial-gradient(
+            circle at 50% 18%,
+            rgba(255, 255, 255, 0.025),
+            transparent 32%
+        ),
+        #000;
+    transition: opacity 850ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+body.is-falling .falling-section,
+body.is-entering-next-scene .falling-section,
+body.is-next-scene .falling-section {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+body.is-transition-immediate .falling-section,
+body.is-transition-immediate #bg,
+body.is-transition-immediate .falling-ring {
+    transition-duration: 1ms !important;
+}
+
+body.is-falling-settled .falling-section {
+    --falling-ring-size: min(68vh, 72vw);
+}
+
+.falling-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.falling-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: block;
+    width: var(--falling-ring-size);
+    height: var(--falling-ring-size);
+    object-fit: cover;
+    transform: translate(-50%, -50%);
+    transition:
+        width 1200ms cubic-bezier(0.16, 1, 0.3, 1),
+        height 1200ms cubic-bezier(0.16, 1, 0.3, 1),
+        opacity 700ms ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.falling-copy {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(28px, 5vh, 70px);
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(16px, 1.5vw, 25px);
+    letter-spacing: 0.08em;
+    white-space: nowrap;
+    transform: translateX(-50%);
+    transition: opacity 450ms ease;
+}
+
+.falling-scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: calc(clamp(28px, 5vh, 70px) + clamp(38px, 5.5vh, 60px));
+    color: rgba(255, 255, 255, 0.78);
+    font-family: serif;
+    font-size: clamp(42px, 7vh, 86px);
+    font-weight: 300;
+    line-height: 1;
+    opacity: 0;
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
+    transform: translateX(-50%) rotate(90deg);
+    transform-origin: 50% 50%;
+    transition: opacity 320ms ease;
+}
+
+.falling-section.is-scroll-hint-visible .falling-scroll-cue {
+    opacity: 0.62;
+    animation: falling-scroll-pulse 1600ms ease-in-out infinite;
+}
+
+.falling-object-field {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.falling-object {
+    position: absolute;
+    top: var(--object-y);
+    left: var(--object-x);
+    width: clamp(90px, var(--object-width), 390px);
+    margin: 0;
+    pointer-events: auto;
+    transform: rotate(var(--object-rotation));
+    transform-origin: 50% 50%;
+    animation:
+        falling-object-drift var(--drift-duration, 7s)
+        ease-in-out var(--drift-delay, 0s) infinite alternate;
+}
+
+.falling-object__image {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: 0.82;
+    filter: brightness(0.88);
+    pointer-events: none;
+    user-select: none;
+    transition:
+        opacity 240ms ease,
+        filter 240ms ease,
+        scale 380ms cubic-bezier(0.16, 1, 0.3, 1);
+    -webkit-user-drag: none;
+}
+
+.falling-object:is(:hover, :focus-within),
+.falling-object.is-previewing {
+    z-index: 4;
+    animation-play-state: paused;
+}
+
+.falling-object:is(:hover, :focus-within) .falling-object__image,
+.falling-object.is-previewing .falling-object__image {
+    opacity: 1;
+    filter: brightness(1.25) contrast(1.08);
+    scale: 1.055;
+    animation: falling-object-preview 850ms ease-in-out infinite alternate;
+}
+
+.falling-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483646;
+    display: none;
+    width: clamp(135px, 20vw, 310px);
+    height: auto;
+    opacity: 0;
+    pointer-events: none;
+    transform-origin: 50% 58%;
+    transition:
+        opacity 500ms ease,
+        scale 360ms cubic-bezier(0.16, 1, 0.3, 1),
+        filter 360ms ease;
+    user-select: none;
+    will-change: transform;
+    -webkit-user-drag: none;
+}
+
+body.is-falling .falling-cursor,
+body.is-entering-next-scene .falling-cursor {
+    display: block;
+    opacity: 1;
+}
+
+.falling-cursor.is-pulled {
+    scale: 0.78 1.22;
+    filter: brightness(1.35);
+}
+
+.abyss-zone {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 6;
+    display: block;
+    height: min(78vh, 760px);
+    pointer-events: none;
+    background:
+        radial-gradient(
+            ellipse at 50% 68%,
+            rgba(255, 255, 255, 0.025),
+            transparent 34%
+        );
+}
+
+.abyss-copy {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.42);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(14px, 1.2vw, 20px);
+    letter-spacing: 0.32em;
+    transform: translateX(-50%);
+}
+
+.abyss-hole {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    width: min(48vw, 680px);
+    height: min(16vw, 205px);
+    padding: 0;
+    border: 1px solid rgba(205, 205, 205, 0.62);
+    border-radius: 50%;
+    outline: none;
+    background: #020202;
+    box-shadow:
+        0 -12px 50px rgba(255, 255, 255, 0.07),
+        0 0 0 1px rgba(255, 255, 255, 0.04),
+        inset 0 1px 16px rgba(190, 190, 190, 0.12);
+    pointer-events: auto;
+    transform: translateX(-50%) scale(1);
+    transform-origin: center bottom;
+    transition:
+        transform 620ms cubic-bezier(0.16, 1, 0.3, 1),
+        box-shadow 520ms ease;
+}
+
+.abyss-hole.is-armed,
+.abyss-hole:hover,
+.abyss-hole:focus-visible {
+    transform: translateX(-50%) scale(1.16);
+    box-shadow:
+        0 -20px 88px rgba(255, 255, 255, 0.12),
+        0 0 0 1px rgba(225, 225, 225, 0.12),
+        inset 0 1px 22px rgba(205, 205, 205, 0.15);
+}
+
+.abyss-hole__rim {
+    position: absolute;
+    inset: 3%;
+    overflow: hidden;
+    border-radius: 50%;
+    background:
+        radial-gradient(
+            ellipse at 50% 10%,
+            rgba(205, 205, 205, 0.34),
+            rgba(130, 130, 130, 0.16) 34%,
+            rgba(55, 55, 55, 0.06) 58%,
+            transparent 78%
+        ),
+        linear-gradient(
+            180deg,
+            rgba(160, 160, 160, 0.14),
+            rgba(20, 20, 20, 0.04) 54%,
+            transparent 82%
+        ),
+        #020202;
+}
+
+.abyss-hole__rim::before {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' viewBox='0 0 180 180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.72' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.55'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+    content: '';
+    mix-blend-mode: screen;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.next-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: #050000;
+    transition: opacity 1100ms ease;
+}
+
+body.is-entering-next-scene .next-scene,
+body.is-next-scene .next-scene {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.hell-stage {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hell-stage__background,
+.hell-stage__pattern {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-stage__background {
+    z-index: 0;
+}
+
+.hell-stage__pattern {
+    z-index: 3;
+    opacity: 0.72;
+}
+
+.hell-object-field {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.hell-object {
+    --copy-left: 100%;
+    --copy-top: 50%;
+    --copy-width: 330px;
+    position: absolute;
+    top: var(--hell-y);
+    left: var(--hell-x);
+    z-index: 1;
+    display: block;
+    width: var(--hell-width);
+    aspect-ratio: var(--hell-ratio);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: rgba(228, 215, 215, 0.82);
+    cursor: pointer;
+}
+
+.hell-object__still,
+.hell-object__motion {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-object__motion {
+    z-index: 1;
+    opacity: 0;
+}
+
+.hell-object.is-active {
+    z-index: 5;
+}
+
+.hell-object.is-active .hell-object__still {
+    opacity: 0;
+}
+
+.hell-object.is-active .hell-object__motion {
+    opacity: 1;
+}
+
+.hell-object__copy {
+    position: absolute;
+    top: var(--copy-top);
+    left: var(--copy-left);
+    z-index: 7;
+    width: var(--copy-width);
+    color: rgba(231, 219, 219, 0.86);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(13px, 1.2vw, 23px);
+    font-weight: normal;
+    line-height: 1.45;
+    letter-spacing: 0.035em;
+    opacity: 0;
+    pointer-events: none;
+    text-align: left;
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.92),
+        0 0 14px rgba(124, 69, 69, 0.46);
+    transform: translate(12px, -50%);
+    transition:
+        opacity 180ms ease,
+        transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: normal;
+}
+
+.hell-object:is(:hover, :focus-visible, .is-active) .hell-object__copy {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+.hell-object:focus-visible::after {
+    position: absolute;
+    inset: 8%;
+    border: 1px solid rgba(225, 207, 207, 0.42);
+    border-radius: 50%;
+    content: '';
+    filter: blur(2px);
+}
+
+.hell-object--strawberry {
+    --hell-x: 18.2%;
+    --hell-y: 4.5%;
+    --hell-width: 11%;
+    --hell-ratio: 212 / 269;
+    --copy-left: 103%;
+    --copy-top: 54%;
+    --copy-width: 280px;
+}
+
+.hell-object--mud {
+    --hell-x: 2.6%;
+    --hell-y: 28.5%;
+    --hell-width: 16.5%;
+    --hell-ratio: 347 / 249;
+    --copy-left: 82%;
+    --copy-top: 18%;
+    --copy-width: 260px;
+}
+
+.hell-object--infant {
+    --hell-x: 25.7%;
+    --hell-y: 39.8%;
+    --hell-width: 12.3%;
+    --hell-ratio: 249 / 317;
+    --copy-left: 84%;
+    --copy-top: 22%;
+    --copy-width: 250px;
+}
+
+.hell-object--twins {
+    --hell-x: 40.6%;
+    --hell-y: 21.2%;
+    --hell-width: 19.6%;
+    --hell-ratio: 357 / 378;
+    --copy-left: 58%;
+    --copy-top: 104%;
+    --copy-width: 350px;
+}
+
+.hell-object--candle {
+    --hell-x: 61%;
+    --hell-y: 3.7%;
+    --hell-width: 11.5%;
+    --hell-ratio: 221 / 245;
+    --copy-left: 44%;
+    --copy-top: 108%;
+    --copy-width: 300px;
+}
+
+.hell-object--caterpillar {
+    --hell-x: 84.8%;
+    --hell-y: 6.2%;
+    --hell-width: 13%;
+    --hell-ratio: 303 / 324;
+    --copy-left: -64%;
+    --copy-top: 104%;
+    --copy-width: 160px;
+}
+
+.hell-object--flower {
+    --hell-x: 7.8%;
+    --hell-y: 65.8%;
+    --hell-width: 16%;
+    --hell-ratio: 306 / 303;
+    --copy-left: 88%;
+    --copy-top: 20%;
+    --copy-width: 290px;
+}
+
+.hell-object--balloon {
+    --hell-x: 37.2%;
+    --hell-y: 67.5%;
+    --hell-width: 12.4%;
+    --hell-ratio: 274 / 350;
+    --copy-left: 82%;
+    --copy-top: 24%;
+    --copy-width: 230px;
+}
+
+.hell-object--heart {
+    --hell-x: 59.2%;
+    --hell-y: 60.5%;
+    --hell-width: 13%;
+    --hell-ratio: 293 / 289;
+    --copy-left: 82%;
+    --copy-top: 34%;
+    --copy-width: 350px;
+}
+
+.hell-object--hood {
+    --hell-x: 81.8%;
+    --hell-y: 76.5%;
+    --hell-width: 11.7%;
+    --hell-ratio: 225 / 241;
+    --copy-left: -160%;
+    --copy-top: 38%;
+    --copy-width: 250px;
+}
+
+.hell-mizuko {
+    position: absolute;
+    top: 34.5%;
+    left: 74.5%;
+    z-index: 5;
+    width: 9%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.hell-mizuko img {
+    display: block;
+    width: 100%;
+    height: auto;
+    opacity: 0.78;
+    filter:
+        brightness(0.86)
+        drop-shadow(0 0 7px rgba(245, 234, 234, 0.28));
+    pointer-events: none;
+    transition:
+        opacity 260ms ease,
+        filter 360ms ease,
+        transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-mizuko:is(:hover, :focus-visible) img,
+body.is-hell-story .hell-mizuko img {
+    opacity: 1;
+    filter:
+        brightness(1.25)
+        contrast(1.08)
+        drop-shadow(0 0 10px rgba(255, 248, 248, 0.78))
+        drop-shadow(0 0 28px rgba(161, 91, 91, 0.42));
+    transform: scale(1.035);
+}
+
+.hell-mizuko:focus-visible::after {
+    position: absolute;
+    inset: -5%;
+    border: 1px solid rgba(244, 228, 228, 0.48);
+    border-radius: 48%;
+    content: '';
+}
+
+.hell-story {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 650ms ease;
+    visibility: hidden;
+}
+
+body.is-hell-story .hell-story {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.hell-story__shade {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+    transition: background-color 760ms ease;
+}
+
+.hell-story__narrative {
+    position: absolute;
+    top: 10.5%;
+    left: 10.5%;
+    z-index: 1;
+    width: 45%;
+    height: 76%;
+    margin: 0;
+    color: rgba(239, 229, 229, 0.9);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(14px, 1.52vw, 27px);
+    font-weight: normal;
+    letter-spacing: 0.075em;
+    line-height: 2.15;
+    opacity: 1;
+    overflow: hidden;
+    text-align: start;
+    text-orientation: mixed;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.92);
+    transition: opacity 420ms ease;
+    writing-mode: vertical-rl;
+}
+
+.hell-story__accusation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: min(82vw, 1100px);
+    margin: 0;
+    color: #9f0808;
+    font-family: 'ChillHuoFangSongConBold', serif;
+    font-size: clamp(25px, 3.1vw, 58px);
+    letter-spacing: 0.14em;
+    line-height: 1.5;
+    opacity: 0;
+    text-align: center;
+    text-shadow:
+        0 0 4px rgba(150, 0, 0, 0.62),
+        0 0 24px rgba(90, 0, 0, 0.45);
+    transform: translate(-50%, -42%);
+    transition:
+        opacity 620ms ease 160ms,
+        transform 900ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+}
+
+.hell-story__advance {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+body.is-hell-accusing .hell-story__shade {
+    background: #000;
+}
+
+body.is-hell-accusing .hell-story__narrative {
+    opacity: 0;
+}
+
+body.is-hell-accusing .hell-story__accusation {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+}
+
+.door-section {
+    position: fixed;
+    inset: 0;
+    z-index: 9;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: #fff;
+    transition: opacity 900ms ease;
+}
+
+.door-section__image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+body.is-door-scene .door-section {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.is-door-scene .next-scene {
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes falling-scroll-pulse {
+    0%,
+    100% {
+        opacity: 0.3;
+        translate: 0 -5px;
+    }
+
+    50% {
+        opacity: 0.82;
+        translate: 0 6px;
+    }
+}
+
+@keyframes falling-object-drift {
+    from {
+        translate: -8px -6px;
+    }
+
+    to {
+        translate: 9px 8px;
+    }
+}
+
+@keyframes falling-object-preview {
+    from {
+        transform: rotate(-1.5deg) translateY(-3px);
+    }
+
+    to {
+        transform: rotate(1.5deg) translateY(3px);
     }
 }
 
@@ -187,6 +1126,11 @@ body {
 
 .custom-cursor.is-visible {
     opacity: 1;
+}
+
+body.is-falling .custom-cursor,
+body.is-entering-next-scene .custom-cursor {
+    display: none;
 }
 
 .custom-cursor__image {
@@ -217,9 +1161,18 @@ body {
     opacity: 0;
 }
 
+.custom-cursor__image--eye {
+    top: -5px;
+    left: -29px;
+    width: 82px;
+    height: auto;
+    opacity: 0;
+}
+
 .custom-cursor.is-key .custom-cursor__image--default,
 .custom-cursor.is-hand .custom-cursor__image--default,
-.custom-cursor.is-grabbing .custom-cursor__image--default {
+.custom-cursor.is-grabbing .custom-cursor__image--default,
+.custom-cursor.is-eye .custom-cursor__image--default {
     opacity: 0;
 }
 
@@ -235,15 +1188,37 @@ body {
     opacity: 1;
 }
 
+.custom-cursor.is-eye .custom-cursor__image--eye {
+    opacity: 1;
+}
+
 @media (pointer: coarse) {
     .custom-cursor {
         display: none;
+    }
+
+    .falling-cursor {
+        display: none !important;
     }
 }
 
 @media (prefers-reduced-motion: reduce) {
     .layer-object {
         animation: none;
+    }
+
+    .convergence-circle,
+    .convergence-hint,
+    .falling-object,
+    .falling-object__image,
+    .falling-scroll-cue,
+    .hell-story,
+    .hell-story__shade,
+    .hell-story__narrative,
+    .hell-story__accusation,
+    .door-section {
+        animation: none !important;
+        transition-duration: 1ms !important;
     }
 
     .custom-cursor__image {
