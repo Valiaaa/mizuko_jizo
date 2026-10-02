@@ -1,0 +1,276 @@
+.door-room[data-room='2'] {
+    background: #eeeae4 url('../assets/Page5.1_寻找_asset/5.1bg.jpg') center / cover no-repeat;
+    color: #171513;
+}
+
+.offering-stage {
+    position: relative;
+    width: min(100vw, 177.7778vh);
+    height: min(100vh, 56.25vw);
+    container-type: size;
+}
+
+.offering-prayer {
+    position: absolute;
+    top: 23%;
+    left: 2.4%;
+    height: 55%;
+    margin: 0;
+    color: #a13021;
+    font-family: 'ChillHuoFangSongConBold', 'Songti TC', serif;
+    font-size: clamp(16px, 1.5cqw, 32px);
+    line-height: 1.2;
+    letter-spacing: -20%;
+    writing-mode: vertical-rl;
+}
+
+.offering-rings {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 74cqh;
+    height: 74cqh;
+    transform: translate(-50%, -50%);
+    animation: offering-rings-turn 100s linear infinite;
+    animation-play-state: paused;
+    pointer-events: none;
+    object-fit: cover;
+    filter: grayscale(1) invert(1);
+    opacity: 0.35;
+}
+
+.offering-mizuko {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: 20cqw;
+    height: 52cqh;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    transform: translate(-50%, -50%);
+}
+
+.offering-mizuko__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 380ms ease;
+}
+
+.offering-mizuko__image.is-current,
+.offering-text__image.is-current {
+    opacity: 1;
+}
+
+.offering-mizuko:focus-visible {
+    outline: 1px dashed #8d8075;
+    outline-offset: 4px;
+}
+
+.offering-orbit {
+    --orbit-radius: 36.5cqh;
+    --orbit-duration: 160s;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 3;
+    width: 0;
+    height: 0;
+}
+
+.offering-orbit__rotation {
+    animation: offering-orbit-turn var(--orbit-duration) linear infinite;
+    animation-play-state: paused;
+}
+
+.offering-orbit__slot {
+    position: absolute;
+    width: 12cqw;
+    height: 22cqh;
+    margin-top: -11cqh;
+    margin-left: -6cqw;
+    transform: rotate(var(--offering-angle)) translateX(var(--orbit-radius)) rotate(calc(-1 * var(--offering-angle)));
+}
+
+.offering-orbit__counter {
+    width: 100%;
+    height: 100%;
+    animation: offering-orbit-counter var(--orbit-duration) linear infinite;
+    animation-play-state: paused;
+}
+
+.offering-symbol {
+    display: grid;
+    width: 100%;
+    height: 100%;
+    padding: 6%;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    place-items: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.offering-symbol img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    transform: translateY(0) scale(1);
+    transition: transform 260ms ease, filter 260ms ease;
+}
+
+.has-custom-cursor .offering-symbol,
+.has-custom-cursor .offering-symbol * {
+    cursor: pointer !important;
+}
+
+.offering-symbol:is(:hover, :focus-visible) img {
+    filter: drop-shadow(0 5px 3px rgba(40, 30, 22, 0.15));
+    transform: translateY(-4px) scale(1.055) rotate(-2deg);
+}
+
+.offering-symbol:active img {
+    transform: translateY(-2px) scale(0.97);
+}
+
+.offering-symbol:focus-visible {
+    outline: 1px dashed #8d8075;
+    outline-offset: -6px;
+}
+
+.door-room.is-active .offering-rings,
+.door-room.is-active .offering-orbit__rotation,
+.door-room.is-active .offering-orbit__counter {
+    animation-play-state: running;
+}
+
+/* Keep a hovered offering still enough to take hold of it. */
+.offering-stage:has(.offering-symbol:is(:hover, :focus-visible)) .offering-orbit__rotation,
+.offering-stage:has(.offering-symbol:is(:hover, :focus-visible)) .offering-orbit__counter {
+    animation-play-state: paused;
+}
+
+.offering-text {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.offering-text__image {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: auto;
+    height: 100%;
+    opacity: 0;
+    filter: brightness(0);
+    transition: opacity 380ms ease;
+}
+
+.offering-copy {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@keyframes offering-rings-turn {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+
+@keyframes offering-orbit-turn {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes offering-orbit-counter {
+    to { transform: rotate(-360deg); }
+}
+
+@media (max-aspect-ratio: 1/1) {
+    .door-room[data-room='2'] {
+        overflow-y: auto;
+        place-items: start center;
+    }
+
+    .offering-stage {
+        width: 100%;
+        height: max(100svh, 800px);
+    }
+
+    .offering-prayer {
+        top: 4%;
+        left: 6%;
+        width: 88%;
+        height: auto;
+        font-size: 16px;
+        line-height: 1.7;
+        writing-mode: horizontal-tb;
+    }
+
+    .offering-orbit {
+        --orbit-radius: 36cqw;
+        top: 46%;
+    }
+
+    .offering-orbit__slot {
+        width: 22cqw;
+        height: 26cqw;
+        margin-left: -11cqw;
+        margin-top: -13cqw;
+    }
+
+    .offering-mizuko {
+        top: 46%;
+        width: 34cqw;
+        height: 62cqw;
+    }
+
+    .offering-rings {
+        top: 46%;
+        width: 62cqw;
+        height: 62cqw;
+    }
+
+    .offering-text__image {
+        display: none;
+    }
+
+    .offering-announcement {
+        right: 8%;
+        bottom: 7%;
+        left: 8%;
+        width: auto;
+        height: auto;
+        clip-path: none;
+        white-space: normal;
+        font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif;
+        font-size: 18px;
+        line-height: 1.8;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .offering-rings,
+    .offering-orbit__rotation,
+    .offering-orbit__counter {
+        animation: none;
+    }
+
+    .offering-mizuko__image,
+    .offering-text__image,
+    .offering-symbol img {
+        transition: none;
+    }
+}
+

@@ -1,0 +1,130 @@
+.custom-cursor {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2147483647;
+    width: 43px;
+    height: 64px;
+    opacity: 0;
+    overflow: visible;
+    pointer-events: none;
+    contain: layout style;
+    will-change: transform;
+}
+
+.custom-cursor.is-visible {
+    opacity: 1;
+}
+
+.custom-cursor.is-pointer {
+    opacity: 0;
+}
+
+body.is-falling .custom-cursor,
+body.is-entering-next-scene .custom-cursor {
+    display: none;
+}
+
+.custom-cursor__image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    width: auto;
+    height: 64px;
+    pointer-events: none;
+    transition: opacity 45ms linear;
+}
+
+.custom-cursor__image--default {
+    opacity: 1;
+}
+
+.custom-cursor__image--pointing {
+    top: 0;
+    left: 0;
+    height: 64px;
+    opacity: 0;
+}
+.custom-cursor.is-pointing .custom-cursor__image--default { opacity: 0; }
+.custom-cursor.is-pointing .custom-cursor__image--pointing { opacity: 1; }
+
+.custom-cursor__image--key {
+    opacity: 0;
+    height: 76.8px;
+    top: -2.4px;
+    left: -2.4px;
+}
+
+.custom-cursor__image--hand,
+.custom-cursor__image--grab {
+    top: 10px;
+    left: 10px;
+    opacity: 0;
+}
+
+.custom-cursor__image--eye {
+    top: -5px;
+    left: -29px;
+    width: 82px;
+    height: auto;
+    opacity: 0;
+}
+
+.custom-cursor.is-key .custom-cursor__image--default,
+.custom-cursor.is-hand .custom-cursor__image--default,
+.custom-cursor.is-grabbing .custom-cursor__image--default,
+.custom-cursor.is-eye .custom-cursor__image--default {
+    opacity: 0;
+}
+
+.custom-cursor.is-key .custom-cursor__image--key {
+    opacity: 1;
+}
+
+.custom-cursor.is-hand .custom-cursor__image--hand {
+    opacity: 1;
+}
+
+.custom-cursor.is-grabbing .custom-cursor__image--grab {
+    opacity: 1;
+}
+
+.custom-cursor.is-eye .custom-cursor__image--eye {
+    opacity: 1;
+}
+
+@media (pointer: coarse) {
+    .custom-cursor {
+        display: none;
+    }
+
+    .falling-cursor {
+        display: none !important;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .layer-object {
+        animation: none;
+    }
+
+    .convergence-circle,
+    .convergence-hint,
+    .falling-object,
+    .falling-object__image,
+    .falling-scroll-cue,
+    .hell-story,
+    .hell-story__shade,
+    .hell-story__narrative,
+    .hell-story__accusation,
+    .door-section {
+        animation: none !important;
+        transition-duration: 1ms !important;
+    }
+
+    .custom-cursor__image {
+        transition: none;
+    }
+}
+

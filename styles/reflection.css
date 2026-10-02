@@ -1,0 +1,133 @@
+.door-room[data-room='3'] {
+    background:
+        radial-gradient(circle at 50% 40%, #d9d4ca, #aaa49a 120%);
+    color: #221e1b;
+}
+
+.door-room[data-room='4'] {
+    display: block;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: #000;
+    color: #eeeae5;
+}
+
+.reflection-depth {
+    position: relative;
+    width: 100%;
+    min-height: 660vh;
+    background: #000;
+}
+
+.reflection-depth__backdrop {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    margin-bottom: -100vh;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.reflection-depth__rings {
+    position: absolute;
+    width: min(100vw, 150vh);
+    height: auto;
+    opacity: 0.075;
+    pointer-events: none;
+}
+
+.reflection-depth__rings--upper {
+    top: 0;
+    right: 0;
+    transform: translate(40%, -38%);
+}
+
+.reflection-depth__rings--lower {
+    bottom: 0;
+    left: 0;
+    transform: translate(-40%, 38%);
+}
+
+.reflection-depth__tear {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    opacity: 0;
+    transition: opacity 650ms ease;
+}
+
+.reflection-depth__tear img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: min(100vh, 72vw);
+    height: auto;
+    filter: brightness(1.3);
+    transform: translate(-50%, -50%) rotate(-90deg);
+}
+
+.reflection-depth.is-tearing .reflection-depth__tear {
+    opacity: 0.45;
+}
+
+.reflection-depth__text {
+    position: absolute;
+    z-index: 1;
+    max-width: 40%;
+    margin: 0;
+    font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif;
+    font-size: clamp(19px, 1.7vw, 32px);
+    line-height: 1.55;
+    letter-spacing: 0.035em;
+    text-shadow: 0 1px 6px #000;
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 1000ms ease, transform 1200ms ease;
+}
+
+.reflection-depth__text.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reflection-depth__text--1 { top: 36vh; left: 14%; }
+.reflection-depth__text--2 { top: 125vh; right: 12%; }
+.reflection-depth__text--3 { top: 213vh; left: 26%; }
+.reflection-depth__text--4 { top: 290vh; right: 12%; }
+.reflection-depth__text--5 { top: 364vh; left: 11%; }
+.reflection-depth__text--6 { top: 442vh; right: 9%; }
+.reflection-depth__text--last {
+    bottom: 6vh;
+    left: 50%;
+    width: 80%;
+    max-width: none;
+    text-align: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    transform: translate(-50%, 18px);
+}
+
+.reflection-depth__text--last.is-visible {
+    transform: translate(-50%, 0);
+}
+
+.reflection-depth__suffering {
+    transition: color 220ms ease;
+}
+
+.reflection-depth__text--last:is(:hover, :focus-visible) .reflection-depth__suffering {
+    color: #9f0808;
+}
+
+body.is-reflection-falling.is-reflection-eye .falling-cursor {
+    display: none;
+}
+
+body.is-reflection-falling.is-reflection-eye .custom-cursor {
+    display: block;
+}
+

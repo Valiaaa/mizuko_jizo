@@ -1,0 +1,296 @@
+.room-stage {
+    position: relative;
+    width: min(100vw, 177.7778vh);
+    height: min(100vh, 56.25vw);
+    cursor: var(--cursor-default);
+}
+
+.rooms {
+    position: relative;
+    z-index: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.convergence-field {
+    --convergence-shift: 0px;
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+    visibility: hidden;
+    overflow: hidden;
+    pointer-events: none;
+    transition:
+        opacity 500ms ease,
+        visibility 0s linear 500ms;
+}
+
+.is-drag-phase .convergence-field {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0s;
+}
+
+.convergence-circle {
+    position: absolute;
+    top: 50%;
+    width: 108vh;
+    height: 108vh;
+    overflow: hidden;
+    border-radius: 50%;
+    transform-origin: 50% 50%;
+    will-change: transform;
+}
+
+.convergence-circle--left {
+    left: -54vh;
+    transform:
+        translate3d(var(--convergence-shift), -50%, 0);
+}
+
+.convergence-circle--right {
+    right: -54vh;
+    transform:
+        translate3d(calc(-1 * var(--convergence-shift)), -50%, 0);
+}
+
+.convergence-circle img {
+    display: block;
+    opacity: 0.22;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    will-change: filter, opacity;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.convergence-field.is-snapping .convergence-circle {
+    transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.convergence-field.is-snapping .convergence-copy {
+    transition: opacity 160ms linear 260ms;
+}
+
+.convergence-field.is-converged .convergence-circle img {
+    animation: convergence-glow 480ms ease-out both;
+}
+
+.convergence-copy {
+    position: absolute;
+    top: 50%;
+    z-index: 2;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(18px, 2.2vh, 30px);
+    line-height: 1.15;
+    letter-spacing: -8%;
+    writing-mode: vertical-rl;
+    text-orientation: upright;
+    transform: translateY(-50%);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.7);
+    max-height: 40%;
+}
+
+.convergence-copy--left {
+    left: clamp(42px, 11vw, 170px);
+}
+
+.convergence-copy--right {
+    right: clamp(42px, 11vw, 170px);
+}
+
+.convergence-hint {
+    position: absolute;
+    top: 50%;
+    z-index: 3;
+    color: rgba(255, 255, 255, 0.78);
+    font-family: serif;
+    font-size: clamp(42px, 7vh, 86px);
+    font-weight: 300;
+    line-height: 1;
+    transform: translateY(-50%);
+    text-shadow: 0 0 14px rgba(255, 255, 255, 0.22);
+}
+
+.convergence-hint--left {
+    left: clamp(112px, 24vw, 390px);
+    animation: hint-inward-left 1700ms ease-in-out infinite;
+}
+
+.convergence-hint--right {
+    right: clamp(112px, 24vw, 390px);
+    animation: hint-inward-right 1700ms ease-in-out infinite;
+}
+
+.convergence-field.is-converged .convergence-hint {
+    opacity: 0;
+    animation: none;
+}
+
+.layer-field {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    overflow: visible;
+    pointer-events: none;
+}
+
+.layer-object {
+    position: absolute;
+    display: block;
+    height: auto;
+    transform:
+        translate3d(var(--drag-x, 0px), var(--drag-y, 0px), 0)
+        rotate(var(--object-rotation));
+    transform-origin: 50% 50%;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    transition: opacity 80ms linear;
+    animation:
+        subtle-float var(--float-duration, 6000ms)
+        ease-in-out var(--float-delay, 0ms) infinite
+        var(--float-direction, alternate);
+}
+
+.layer-object.is-dragging {
+    animation-play-state: paused;
+}
+
+.room-hit-area {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;
+    cursor: var(--cursor-default);
+}
+
+#room-hotspot {
+    /*
+     * A nearly transparent painted fill gives the browser one stable SVG
+     * hit-test target. Fully transparent fill plus a pointer-transparent
+     * parent can flicker between this path and the layers underneath.
+     */
+    fill: rgba(0, 0, 0, 0.001);
+    pointer-events: fill;
+    cursor: var(--cursor-key);
+    outline: none;
+}
+
+#room-hotspot:focus-visible {
+    stroke: rgba(255, 255, 255, 0.85);
+    stroke-width: 4;
+    vector-effect: non-scaling-stroke;
+}
+
+#room-hotspot.is-complete {
+    pointer-events: none;
+    cursor: inherit;
+}
+
+.interaction-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: auto;
+    cursor: var(--cursor-default);
+    touch-action: none;
+}
+
+.is-drag-phase .layer-object {
+    will-change: transform;
+}
+
+@keyframes subtle-float {
+    from {
+        transform:
+            translate3d(
+                var(--drag-x, 0px),
+                calc(
+                    var(--drag-y, 0px) - var(--float-distance, 4px) +
+                    var(--convergence-scatter-y, 0px)
+                ),
+                0
+            )
+            translateX(var(--convergence-scatter-x, 0px))
+            rotate(var(--object-rotation));
+    }
+
+    to {
+        transform:
+            translate3d(
+                var(--drag-x, 0px),
+                calc(
+                    var(--drag-y, 0px) + var(--float-distance, 4px) +
+                    var(--convergence-scatter-y, 0px)
+                ),
+                0
+            )
+            translateX(var(--convergence-scatter-x, 0px))
+            rotate(var(--object-rotation));
+    }
+}
+
+@keyframes hint-inward-left {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: translate3d(-7px, -50%, 0);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translate3d(7px, -50%, 0);
+    }
+}
+
+@keyframes hint-inward-right {
+    0%,
+    100% {
+        opacity: 0.35;
+        transform: translate3d(7px, -50%, 0);
+    }
+
+    50% {
+        opacity: 0.9;
+        transform: translate3d(-7px, -50%, 0);
+    }
+}
+
+@keyframes convergence-glow {
+    0% {
+        filter:
+            brightness(1)
+            blur(0)
+            drop-shadow(0 0 0 rgba(255, 255, 255, 0));
+    }
+
+    55% {
+        opacity: 0.92;
+        filter:
+            brightness(1.4)
+            blur(2px)
+            drop-shadow(0 0 28px rgba(255, 255, 255, 0.72));
+    }
+
+    100% {
+        opacity: 1;
+        filter:
+            brightness(1.12)
+            blur(0)
+            drop-shadow(0 0 12px rgba(255, 255, 255, 0.28));
+    }
+}
+

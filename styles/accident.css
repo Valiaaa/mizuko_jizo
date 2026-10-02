@@ -1,0 +1,87 @@
+.accident-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 10;
+    background: #fff;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 700ms ease;
+}
+
+body.is-accident-scene .accident-scene {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.accident-scene { display: grid; place-items: center; color: #111; }
+.accident-stage {
+    position: relative;
+    width: min(100vw, 177.7778vh);
+    height: min(100vh, 56.25vw);
+    container-type: size;
+}
+.accident-panel {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 650ms ease, visibility 650ms;
+}
+.accident-panel.is-active { opacity: 1; visibility: visible; pointer-events: auto; }
+.accident-copy {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    height: 60%;
+    transform: translateX(-50%);
+    writing-mode: vertical-rl;
+    font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif;
+    font-size: 1.55cqw;
+    line-height: 1.32;
+    letter-spacing: .035em;
+}
+.accident-copy p { margin: 0 0 0 .65em; }
+.accident-copy p:last-child { margin-left: 0; }
+.accident-panel[data-accident-page='1'] .accident-copy { height: 66%; font-size: 1.45cqw; }
+.accident-keyword {
+    display: inline;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    writing-mode: inherit;
+    letter-spacing: inherit;
+    transition: color 200ms ease;
+}
+.accident-keyword:is(:hover, :focus-visible), .accident-keyword.is-chosen { color: #9f0808; }
+.accident-keyword:focus-visible { outline: 1px solid #9f0808; outline-offset: 3px; }
+.accident-debris {
+    position: absolute;
+    z-index: 2;
+    left: var(--stone-x);
+    top: var(--stone-y);
+    width: var(--stone-width);
+    padding: 0;
+    border: 0;
+    background: transparent;
+    transform: translate(calc(-50% + var(--drag-x, 0px)), calc(-50% + var(--drag-y, 0px)));
+    touch-action: none;
+    user-select: none;
+}
+.accident-debris img { display: block; width: 100%; height: auto; pointer-events: none; }
+.accident-debris.is-dragging { z-index: 3; }
+.accident-debris:focus-visible { outline: 1px dashed #9f0808; outline-offset: 5px; }
+@media (max-aspect-ratio: 1/1) {
+    .accident-stage { width: 100vw; height: 100dvh; }
+    .accident-copy { font-size: 4cqw; }
+    .accident-panel[data-accident-page='1'] .accident-copy { font-size: 4cqw; }
+    .accident-debris { width: calc(var(--stone-width) * 1.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .accident-panel, .accident-keyword { transition: none; }
+}
+

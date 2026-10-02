@@ -1,0 +1,419 @@
+.next-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 8;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    opacity: 0;
+    pointer-events: none;
+    background: #050000;
+    transition: opacity 1100ms ease;
+}
+
+body.is-entering-next-scene .next-scene,
+body.is-next-scene .next-scene {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.hell-stage {
+    position: absolute;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.hell-stage__background,
+.hell-stage__pattern {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: fill;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-stage__background {
+    z-index: 0;
+    transform: scale(1.045);
+    filter: url('#hell-flame-wave') blur(0.45px) brightness(1.08);
+    animation: hell-firelight 2600ms ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+.hell-stage__pattern {
+    z-index: 3;
+    opacity: 0.72;
+    animation: hell-star-shimmer 2400ms ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+body.is-next-scene .hell-stage__background,
+body.is-next-scene .hell-stage__pattern { animation-play-state: running; }
+@keyframes hell-firelight {
+    0%, 100% { transform: scale(1.045) translate(-3px, 2px); filter: url('#hell-flame-wave') blur(.45px) brightness(1.02); }
+    27% { filter: url('#hell-flame-wave') blur(.7px) brightness(1.16); }
+    48% { transform: scale(1.055) translate(4px, -5px); filter: url('#hell-flame-wave') blur(.4px) brightness(1.07); }
+    73% { filter: url('#hell-flame-wave') blur(.6px) brightness(1.21); }
+}
+@keyframes hell-star-shimmer {
+    0%, 100% { opacity: .48; filter: drop-shadow(0 0 1px #c6aaaa33); }
+    33% { opacity: .88; filter: drop-shadow(0 0 3px #c6aaaa66); }
+    57% { opacity: .65; filter: drop-shadow(0 0 1px #c6aaaa33); }
+    81% { opacity: .74; filter: drop-shadow(0 0 2px #c6aaaa55); }
+}
+#hell-copy-caterpillar { white-space: nowrap; letter-spacing: .14em; }
+@media (prefers-reduced-motion: reduce) {
+    .hell-stage__background { animation: none; filter: brightness(1.08); }
+    .hell-stage__pattern { animation: none; }
+}
+
+.hell-object-field {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+}
+
+.hell-object {
+    --copy-left: 100%;
+    --copy-top: 50%;
+    --copy-width: 330px;
+    position: absolute;
+    top: var(--hell-y);
+    left: var(--hell-x);
+    z-index: 1;
+    display: block;
+    width: var(--hell-width);
+    aspect-ratio: var(--hell-ratio);
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: rgba(228, 215, 215, 0.82);
+    cursor: pointer;
+}
+
+.hell-object__still,
+.hell-object__motion {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-object__motion {
+    z-index: 1;
+    opacity: 0;
+}
+
+.hell-object.is-active {
+    z-index: 5;
+}
+
+.hell-object.is-active .hell-object__still {
+    opacity: 0;
+}
+
+.hell-object.is-active .hell-object__motion {
+    opacity: 1;
+}
+
+.hell-object__copy {
+    position: absolute;
+    top: var(--copy-top);
+    left: var(--copy-left);
+    z-index: 7;
+    width: var(--copy-width);
+    color: rgba(231, 219, 219, 0.86);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(13px, 1.2vw, 23px);
+    font-weight: normal;
+    line-height: 1.45;
+    letter-spacing: 0.035em;
+    opacity: 0;
+    pointer-events: none;
+    text-align: left;
+    text-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.92),
+        0 0 14px rgba(124, 69, 69, 0.46);
+    transform: translate(12px, -50%);
+    transition:
+        opacity 180ms ease,
+        transform 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    white-space: normal;
+}
+
+.hell-object:is(:hover, :focus-visible, .is-active) .hell-object__copy {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+.hell-object:focus-visible::after {
+    position: absolute;
+    inset: 8%;
+    border: 1px solid rgba(225, 207, 207, 0.42);
+    border-radius: 50%;
+    content: '';
+    filter: blur(2px);
+}
+
+.hell-object--strawberry {
+    --hell-x: 18.2%;
+    --hell-y: 4.5%;
+    --hell-width: 11%;
+    --hell-ratio: 212 / 269;
+    --copy-left: 103%;
+    --copy-top: 54%;
+    --copy-width: 280px;
+}
+
+.hell-object--mud {
+    --hell-x: 2.6%;
+    --hell-y: 28.5%;
+    --hell-width: 16.5%;
+    --hell-ratio: 347 / 249;
+    --copy-left: 82%;
+    --copy-top: 18%;
+    --copy-width: 260px;
+}
+
+.hell-object--infant {
+    --hell-x: 25.7%;
+    --hell-y: 39.8%;
+    --hell-width: 12.3%;
+    --hell-ratio: 249 / 317;
+    --copy-left: 84%;
+    --copy-top: 22%;
+    --copy-width: 250px;
+}
+
+.hell-object--twins {
+    --hell-x: 40.6%;
+    --hell-y: 21.2%;
+    --hell-width: 19.6%;
+    --hell-ratio: 357 / 378;
+    --copy-left: 58%;
+    --copy-top: 104%;
+    --copy-width: 350px;
+}
+
+.hell-object--candle {
+    --hell-x: 61%;
+    --hell-y: 3.7%;
+    --hell-width: 11.5%;
+    --hell-ratio: 221 / 245;
+    --copy-left: 44%;
+    --copy-top: 108%;
+    --copy-width: 300px;
+}
+
+.hell-object--caterpillar {
+    --hell-x: 84.8%;
+    --hell-y: 6.2%;
+    --hell-width: 13%;
+    --hell-ratio: 303 / 324;
+    --copy-left: -64%;
+    --copy-top: 98%;
+    --copy-width: 160px;
+}
+
+.hell-object--flower {
+    --hell-x: 7.8%;
+    --hell-y: 65.8%;
+    --hell-width: 16%;
+    --hell-ratio: 306 / 303;
+    --copy-left: 88%;
+    --copy-top: 20%;
+    --copy-width: 290px;
+}
+
+.hell-object--balloon {
+    --hell-x: 37.2%;
+    --hell-y: 67.5%;
+    --hell-width: 12.4%;
+    --hell-ratio: 274 / 350;
+    --copy-left: 82%;
+    --copy-top: 24%;
+    --copy-width: 230px;
+}
+
+.hell-object--heart {
+    --hell-x: 59.2%;
+    --hell-y: 60.5%;
+    --hell-width: 13%;
+    --hell-ratio: 293 / 289;
+    --copy-left: 82%;
+    --copy-top: 34%;
+    --copy-width: 350px;
+}
+
+.hell-object--hood {
+    --hell-x: 81.8%;
+    --hell-y: 76.5%;
+    --hell-width: 11.7%;
+    --hell-ratio: 225 / 241;
+    --copy-left: -160%;
+    --copy-top: 38%;
+    --copy-width: 250px;
+}
+
+.hell-object--caterpillar .hell-object__copy,
+.hell-object--hood .hell-object__copy {
+    left: auto;
+    right: 90%;
+    text-align: right;
+}
+
+.hell-mizuko {
+    position: absolute;
+    top: 34.5%;
+    left: 74.5%;
+    z-index: 5;
+    width: 9%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.hell-mizuko img {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    transition:
+        opacity 260ms ease,
+        filter 360ms ease,
+        transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.hell-mizuko:is(:hover, :focus-visible) img,
+body.is-hell-story .hell-mizuko img {
+    filter:
+        brightness(0.88)
+        contrast(1.1)
+        drop-shadow(0 0 4px rgba(245, 234, 234, 0.18));
+    transform: scale(1.02);
+}
+
+.hell-mizuko:focus-visible::after {
+    position: absolute;
+    inset: -5%;
+    border: 1px solid rgba(244, 228, 228, 0.28);
+    border-radius: 48%;
+    content: '';
+}
+
+.hell-story {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 650ms ease;
+    visibility: hidden;
+}
+
+body.is-hell-story .hell-story {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+}
+
+.hell-story__shade {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.58);
+    transition: background-color 760ms ease;
+}
+
+.hell-story__narrative {
+    position: absolute;
+    top: 10.5%;
+    left: 6.5%;
+    z-index: 1;
+    width: 45%;
+    height: 76%;
+    margin: 0;
+    color: rgba(239, 229, 229, 0.9);
+    font-family: 'ChillHuoFangSongConRegular', serif;
+    font-size: clamp(14px, 1.52vw, 27px);
+    font-weight: normal;
+    letter-spacing: -20%;
+    line-height: 1.1;
+    opacity: 1;
+    overflow: hidden;
+    text-align: start;
+    text-orientation: mixed;
+    text-shadow: 0 1px 5px rgba(0, 0, 0, 0.92);
+    transition: opacity 420ms ease;
+    writing-mode: vertical-rl;
+}
+
+.hell-story__accusation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 2;
+    width: min(82vw, 1100px);
+    margin: 0;
+    color: #9f0808;
+    font-family: 'ChillHuoFangSongConBold', serif;
+    font-style: italic;
+    font-size: clamp(25px, 3.1vw, 58px);
+    letter-spacing: -3%;
+    line-height: 1.5;
+    opacity: 0;
+    text-align: center;
+    text-shadow:
+        0 0 4px rgba(150, 0, 0, 0.62),
+        0 0 24px rgba(90, 0, 0, 0.45);
+    filter: blur(var(--ember-blur, 0.4px))
+        drop-shadow(0 0 var(--ember-glow, 6px) rgba(196, 24, 8, var(--ember-light, 0.38)));
+    transform: translate(-50%, -42%);
+    transition:
+        filter 220ms ease,
+        opacity 620ms ease 160ms,
+        transform 900ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+}
+
+.hell-story__advance {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: block;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+body.is-hell-accusing .hell-story__shade {
+    background: #000;
+}
+
+body.is-hell-accusing .hell-story__narrative {
+    opacity: 0;
+}
+
+body.is-hell-accusing .hell-story__accusation {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+}
+

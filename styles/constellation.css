@@ -1,0 +1,96 @@
+.constellation-scene {
+    position: fixed;
+    inset: 0;
+    z-index: 11;
+    background: #fff;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    overflow: hidden;
+    overscroll-behavior: contain;
+    transition: opacity 900ms ease;
+}
+body.is-constellation-scene .constellation-scene { opacity: 1; visibility: visible; pointer-events: auto; }
+.night-depth { position: relative; height: 100vh; }
+.night-viewport { position: sticky; top: 0; height: 100vh; overflow: hidden; background: #fff; transition: background 500ms cubic-bezier(.16,1,.3,1); }
+.night-sky { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 700ms ease; pointer-events: none; }
+.night-sky img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.night-body-morph {
+    position: absolute; left: 50%; top: 50%; width: 20%; height: 5.369vw;
+    transform: translate(-50%, -50%); pointer-events: none;
+    transition: width 500ms cubic-bezier(.16,1,.3,1), height 500ms cubic-bezier(.16,1,.3,1), top 500ms cubic-bezier(.16,1,.3,1);
+    will-change: width, height, top;
+}
+.night-body-large { position: absolute; inset: 0; width: 100%; height: 100%; overflow: hidden; opacity: 0; transition: opacity 500ms cubic-bezier(.16,1,.3,1); pointer-events: none; }
+.night-body-large img { position: absolute; left: 0; top: -194.4645%; width: 100%; height: 294.4645%; pointer-events: none; }
+.night-stars-red { opacity: .55; }
+.night-body-small {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    overflow: hidden; padding: 0; border: 0; pointer-events: auto;
+    background: transparent; opacity: 1; transition: opacity 500ms cubic-bezier(.16,1,.3,1);
+}
+.night-body-small img { position: absolute; width: 307.69%; height: 644.77%; left: -101.84%; top: -322.38%; pointer-events: none; }
+.night-object {
+    position: absolute; z-index: 3; left: var(--item-x); top: var(--item-y); width: var(--item-width);
+    padding: 0; border: 0; background: transparent; touch-action: none; user-select: none;
+    transform: translate(calc(-50% + var(--drag-x, 0px)), calc(-50% + var(--drag-y, 0px)));
+}
+.night-object img { display: block; width: 100%; height: auto; pointer-events: none; }
+.night-object.is-dragging { z-index: 4; }
+.is-cleared .night-body-morph { z-index: 5; }
+.night-object:focus-visible, .night-body-small:focus-visible { outline: 1px dashed #9f0808; outline-offset: 4px; }
+.night-objects { opacity: 1; transition: opacity 700ms ease; }
+.is-expanding .night-objects { opacity: 0; pointer-events: none; }
+.is-expanding .night-viewport { background: #000; }
+.is-expanding .night-body-morph { animation: night-body-soften 500ms linear; width: 100%; height: 33.95995vh; top: 83.02002%; }
+@keyframes night-body-soften { 0%, 100% { filter: blur(0); } 12% { filter: blur(5px); } 42% { filter: blur(2px); } }
+.is-expanding .night-body-small { opacity: 0; pointer-events: none; }
+.is-expanding .night-body-large { opacity: 1; }
+.is-night .night-sky { opacity: 1; }
+.night-star-targets { position: absolute; inset: 0; opacity: 0; transition: opacity 700ms ease; }
+.is-night .night-star-targets { opacity: 1; }
+.night-star {
+    position: absolute; left: var(--star-x); top: var(--star-y); width: 4vw; height: 4vw;
+    transform: translate(-50%, -50%); padding: 0; border: 0; border-radius: 50%;
+    background: transparent; overflow: hidden;
+}
+.night-star span {
+    position: absolute; width: 100vw; height: 100vh;
+    left: calc(2vw + var(--star-bg-x)); top: calc(2vw + var(--star-bg-y));
+    background: url('../assets/Page7_车祸_asset/constellation(progressive)/constellation20.png') 0 0 / 100% 100%;
+    pointer-events: none; opacity: .55;
+}
+.night-star.is-next span { opacity: 1; }
+.night-star.is-connected { visibility: hidden; }
+.night-star.is-next { z-index: 2; animation: night-star-breathe 2300ms ease-in-out infinite; }
+.night-star:focus-visible { outline: 1px solid #9f0808; outline-offset: 3px; }
+@keyframes night-star-breathe { 50% { filter: brightness(1.6) drop-shadow(0 0 5px #fff8); } }
+.night-ceramic { position: absolute; left: 50%; top: 45%; width: min(23vw, 33vh); height: auto; transform: translate(-50%, -50%); opacity: 0; pointer-events: none; transition: opacity 1200ms ease; }
+.is-complete .night-ceramic { opacity: 1; }
+.constellation-scene.is-complete { overflow-y: auto; background: #2e2e2e; }
+.is-complete .night-depth { height: auto; min-height: 240vh; }
+.is-complete .night-viewport { position: relative; margin-bottom: 0; }
+.night-copy { display: none; position: relative; z-index: 5; width: min(72%, 850px); margin: 0 auto; padding: 28vh 0 40vh; color: #eeeae5; font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif; font-size: clamp(20px, 1.8vw, 34px); line-height: 1.85; opacity: 0; transform: translateY(24px); transition: opacity 1400ms ease, transform 1400ms ease; }
+.is-complete .night-copy { display: block; }
+.is-reading .night-copy { opacity: 1; transform: none; }
+.night-copy p { filter: blur(.3px); text-shadow: 0 0 5px #eeeae526; }
+.is-reading .night-copy p { animation: night-copy-flicker 9700ms ease-in-out infinite; }
+.is-reading .night-copy p + p { animation-delay: -3700ms; }
+@keyframes night-copy-flicker {
+    0%, 18%, 43%, 67%, 89%, 100% { opacity: 1; filter: blur(.3px) brightness(1); }
+    25%, 57% { opacity: .985; filter: blur(.34px) brightness(.99); }
+    74% { opacity: .97; filter: blur(.4px) brightness(.985); }
+    77% { opacity: 1; filter: blur(.24px) brightness(1.045); }
+    81% { opacity: .99; filter: blur(.32px) brightness(1.005); }
+}
+.night-copy p + p { margin-top: 2.5em; }
+@media (max-width: 600px) {
+    .night-star { width: 8vw; height: 8vw; }
+    .night-star span { left: calc(4vw + var(--star-bg-x)); top: calc(4vw + var(--star-bg-y)); }
+    .night-ceramic { width: 42vw; }
+    .night-copy { width: 84%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .night-viewport, .night-body-morph, .night-body-small, .night-body-large, .night-sky, .night-star-targets, .night-ceramic, .night-copy { transition-duration: 1ms; }
+    .night-star.is-next, .is-expanding .night-body-morph, .is-reading .night-copy p { animation: none; }
+}

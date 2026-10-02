@@ -39,7 +39,7 @@ scripts/
     └── hell-experience.js             # 地狱叙事、门状态与房间路由
 
 styles/
-└── base.css                           # 当前全局视觉样式
+└── base.css                           # 样式入口，按原顺序加载各场景样式
 ```
 
 以后可以按同样方式增加目录，例如：
@@ -117,3 +117,5 @@ Test 进度独立写入 `mizuko-room-test-progress-v1` 和 `mizuko-door-test-pro
 门按 1 → 2 → 3 解锁：visitedDoors 表示已进入并返回门厅的房间，单纯进入不记为完成。未解锁的门使用 disabled，hover 不开门且不显示钥匙；showScene/openDoorRoom 同样检查前置进度，阻止方向键或直接 URL 绕过。已有保存进度保留。
 
 测试模式的夜晚节点依次为：车祸第 4 页 → 清理物品（nightState=clearing）→ 全部挪开、身体可点击（cleared）→ 连星初始状态（stars）→ 全部连好、陶瓷出现且可滚动（complete）。左右方向键逐节点前后切换；nightState 写入 URL，支持直接打开与刷新恢复。正式体验继续使用原交互，不跳过清理和连星。
+
+CSS 维护：styles/base.css 只作为加载入口。foundation.css 管理字体与全局基础；room.css、falling.css、hell.css、doors.css、offerings.css、reflection.css、accident.css、constellation.css 对应各场景；cursor.css 管理光标和共享无障碍设置；scene-support.css 保留原有后置场景覆盖及坠落动画。所有文件仍在 styles/ 同层，素材相对路径不变，加载顺序保持原始 CSS 顺序。
