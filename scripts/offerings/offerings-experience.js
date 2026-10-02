@@ -8,17 +8,11 @@
     const cursor = document.querySelector('.custom-cursor');
     let selectionVersion = 0;
 
-    const releaseOffering = () => {
-        document.body.classList.remove('is-offering-grabbing');
-        cursor?.classList.remove('is-grabbing');
-        if (room.matches('.is-active') && room.querySelector('.offering-symbol:hover')) {
-            cursor?.classList.add('is-hand');
-        }
-    };
+    const clearOfferingCursor = () => cursor?.classList.remove('is-pointer');
 
     const resetOfferings = () => {
         selectionVersion += 1;
-        releaseOffering();
+        clearOfferingCursor();
         statues.forEach((image) => {
             const active = image.dataset.mizuko === 'Plain';
             image.classList.toggle('is-current', active);
@@ -52,27 +46,15 @@
 
     symbols.forEach((symbol) => {
         symbol.addEventListener('click', () => selectOffering(symbol));
-        symbol.addEventListener('pointerenter', () => {
-            cursor?.classList.add('is-hand');
-        });
-        symbol.addEventListener('pointerleave', () => {
-            cursor?.classList.remove('is-hand');
-            releaseOffering();
-        });
-        symbol.addEventListener('pointerdown', () => {
-            document.body.classList.add('is-offering-grabbing');
-            cursor?.classList.remove('is-hand');
-            cursor?.classList.add('is-grabbing');
-        });
+        symbol.addEventListener('pointerenter', () => cursor?.classList.add('is-pointer'));
+        symbol.addEventListener('pointerleave', clearOfferingCursor);
     });
-    window.addEventListener('pointerup', releaseOffering);
-    window.addEventListener('pointercancel', releaseOffering);
-    window.addEventListener('blur', releaseOffering);
+    window.addEventListener('blur', clearOfferingCursor);
     window.addEventListener('mizuko:scenechange', (event) => {
         if (event.detail.scene === 'door-2') resetOfferings();
         else {
             selectionVersion += 1;
-            releaseOffering();
+            clearOfferingCursor();
         }
     });
     resetOfferings();

@@ -2,7 +2,7 @@
     const params = new URLSearchParams(window.location.search);
     const scenes = new Set([
         'room', 'falling', 'next', 'hell-story', 'hell-accusation',
-        'doors', 'door-1', 'door-2', 'door-3', 'door-4'
+        'doors', 'door-1', 'door-2', 'door-3', 'door-4', 'accident', 'constellation'
     ]);
     const resolveScene = (value) => scenes.has(value) ? value : null;
     const testMode = params.get('test') === '1' ||
@@ -15,6 +15,7 @@
         url.searchParams.set('scene', scene);
         if (scene === 'room') url.searchParams.set('phase', String(phase));
         else url.searchParams.delete('phase');
+        if (scene !== 'accident') url.searchParams.delete('accidentPage');
         if (url.href !== window.location.href) {
             window.history.replaceState({}, '', url);
         }
@@ -26,6 +27,10 @@
             window.mizukoExperience.enterRoomScene(options.phase ?? 7);
         } else if (scene === 'falling') {
             window.mizukoExperience.enterFallingScene({ immediate: true });
+        } else if (scene === 'accident') {
+            return window.mizukoAccidentExperience.enterScene(options.page);
+        } else if (scene === 'constellation') {
+            return window.mizukoAccidentExperience.enterConstellation();
         } else {
             return window.mizukoHellExperience.showScene(scene);
         }
@@ -37,6 +42,8 @@
     const step = (direction) => {
         const experience = window.mizukoExperience;
         const scene = experience.getScene();
+        if (scene === 'accident') return window.mizukoAccidentExperience.step(direction);
+        if (scene === 'constellation') return direction < 0 ? goTo('accident', { page: 4 }) : false;
         if (scene === 'room') {
             const phase = experience.getPhase();
             if (direction > 0 && phase === 7) return goTo('falling');
@@ -47,6 +54,7 @@
             const door = Number(scene.slice(5));
             if (direction < 0) return goTo('doors');
             if (door < 3) return goTo(`door-${door + 1}`);
+            if (door === 4) return goTo('accident');
             if (door === 3 && window.mizukoHellExperience.hasVisitedEveryDoor()) {
                 return goTo('door-4');
             }
@@ -69,7 +77,9 @@
             '#bg': scene === 'room',
             '#falling-section': scene === 'falling',
             '#next-scene': ['next', 'hell-story', 'hell-accusation'].includes(scene),
-            '#door-section': scene === 'doors' || scene.startsWith('door-')
+            '#door-section': scene === 'doors' || scene.startsWith('door-'),
+            '#accident-scene': scene === 'accident',
+            '#constellation-scene': scene === 'constellation'
         };
         Object.entries(surfaces).forEach(([selector, active]) => {
             const element = document.querySelector(selector);

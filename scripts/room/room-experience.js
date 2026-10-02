@@ -641,6 +641,8 @@
         }
 
         function setCursorMode(mode) {
+            customCursor.classList.toggle('is-pointing', mode === 'pointing');
+            customCursor.classList.toggle('is-pointer', mode === 'pointer');
             customCursor.classList.toggle('is-key', mode === 'key');
             customCursor.classList.toggle('is-hand', mode === 'hand');
             customCursor.classList.toggle('is-eye', mode === 'eye');
@@ -652,17 +654,30 @@
 
         function updateCursorModeAt(clientX, clientY) {
             if (
-                document.body.classList.contains('is-hell-eye-cursor')
+                document.body.classList.contains('is-hell-eye-cursor') ||
+                document.body.classList.contains('is-reflection-eye')
             ) {
                 setCursorMode('eye');
                 return;
             }
 
             if (currentScene !== 'room') {
+                if (currentScene === 'doors' && document.elementFromPoint(clientX, clientY)?.closest('.door-card, .door-reflection')) {
+                    setCursorMode('key');
+                    return;
+                }
+                if (currentScene === 'constellation') {
+                    setCursorMode(window.mizukoConstellationExperience?.getCursorMode(clientX, clientY) || 'default');
+                    return;
+                }
+                if (currentScene === 'accident') {
+                    setCursorMode(window.mizukoAccidentExperience?.getCursorMode(clientX, clientY) || 'default');
+                    return;
+                }
                 const offering = currentScene === 'door-2' &&
                     document.elementFromPoint(clientX, clientY)?.closest('.offering-symbol');
                 if (offering) {
-                    setCursorMode(document.body.classList.contains('is-offering-grabbing') ? 'grabbing' : 'hand');
+                    setCursorMode('pointer');
                     return;
                 }
                 setCursorMode('default');
@@ -685,7 +700,7 @@
             }
 
             setCursorMode(
-                canAdvanceAt(clientX, clientY) ? 'key' : 'default'
+                canAdvanceAt(clientX, clientY) ? 'pointing' : 'default'
             );
         }
 

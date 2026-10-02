@@ -8,6 +8,8 @@
     if (!section || !objectField || !fallingCursor || !abyssHole) {
         return;
     }
+    // Share one animated cursor across both falls, outside the scroll surfaces.
+    document.body.append(fallingCursor);
 
     const assetRoot = 'assets/Page3_Falling_asset/Falling_Objects/';
 
@@ -221,8 +223,11 @@
         pointerX = event.clientX;
         pointerY = event.clientY;
 
-        if (document.body.classList.contains('is-falling')) {
-            updateAbyssState(pointerX, pointerY);
+        if (document.body.classList.contains('is-falling') ||
+            document.body.classList.contains('is-reflection-falling')) {
+            if (document.body.classList.contains('is-falling')) {
+                updateAbyssState(pointerX, pointerY);
+            }
 
             if (!cursorFrame) {
                 cursorFrame = window.requestAnimationFrame(
@@ -238,6 +243,11 @@
             window.scrollY > 8
         ) {
             hideScrollHint();
+            if (event.detail?.scene === 'door-4') {
+                paintedX = pointerX;
+                paintedY = pointerY;
+                paintFallingCursor();
+            }
         }
     }, { passive: true });
 
