@@ -15,6 +15,7 @@
         url.searchParams.set('scene', scene);
         if (scene === 'room') url.searchParams.set('phase', String(phase));
         else url.searchParams.delete('phase');
+        if (scene !== 'constellation') url.searchParams.delete('nightState');
         if (scene !== 'accident') url.searchParams.delete('accidentPage');
         if (url.href !== window.location.href) {
             window.history.replaceState({}, '', url);
@@ -30,7 +31,9 @@
         } else if (scene === 'accident') {
             return window.mizukoAccidentExperience.enterScene(options.page);
         } else if (scene === 'constellation') {
-            return window.mizukoAccidentExperience.enterConstellation();
+            window.mizukoAccidentExperience.enterConstellation();
+            if (testMode) window.mizukoConstellationExperience?.enterTestState(options.state || 'clearing');
+            return true;
         } else {
             return window.mizukoHellExperience.showScene(scene);
         }
@@ -43,7 +46,7 @@
         const experience = window.mizukoExperience;
         const scene = experience.getScene();
         if (scene === 'accident') return window.mizukoAccidentExperience.step(direction);
-        if (scene === 'constellation') return direction < 0 ? goTo('accident', { page: 4 }) : false;
+        if (scene === 'constellation') return window.mizukoConstellationExperience.stepTest(direction);
         if (scene === 'room') {
             const phase = experience.getPhase();
             if (direction > 0 && phase === 7) return goTo('falling');

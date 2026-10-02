@@ -28,13 +28,14 @@
         return mask.pixels[(Math.floor(y * mask.height) * mask.width + Math.floor(x * mask.width)) * 4 + 3] > 32;
     };
     const setCursor = mode => {
-        for (const name of ['hand','grabbing','eye','key','pointer']) cursor?.classList.toggle(`is-${name}`, mode === name);
+        for (const name of ['hand','grabbing','eye','key','pointer','pointing']) cursor?.classList.toggle(`is-${name}`, mode === name);
     };
     const getCursorMode = (x,y) => {
         if (drag) return 'grabbing';
         const target = document.elementFromPoint(x,y);
         if (target?.closest('.night-object') && phase === 'clearing') return 'hand';
-        if (target?.closest('.night-body-small:not(:disabled), .night-star.is-next')) return 'eye';
+        if (phase === 'stars' && target?.closest('.night-star.is-next')) return 'pointing';
+        if (target?.closest('.night-body-small:not(:disabled)')) return 'eye';
         return 'default';
     };
     const checkClear = () => {
@@ -76,6 +77,22 @@
             star.tabIndex = i === connected ? 0 : -1;
         });
     };
+    const syncTestState = state => {
+        if (!window.mizukoNavigation.testMode) return;
+        const url = new URL(location.href);
+        url.searchParams.set('nightState', state);
+        history.replaceState({}, '', url);
+    };
+    const revealCeramic = () => {
+        phase = 'complete'; scene.dataset.phase = phase;
+        targets.inert = true;
+        ceramic.onload = () => {
+            if (!active || phase !== 'complete') return;
+            scene.classList.add('is-complete'); copy.setAttribute('aria-hidden', 'false');
+        };
+        ceramic.src = 'assets/Page7_车祸_asset/ceramic-turntable.gif';
+        if (ceramic.complete && ceramic.naturalWidth) ceramic.onload();
+    };
     const reset = () => {
         clearTimeout(timer); stopDrag();
         phase = 'clearing'; connected = 0;
@@ -86,7 +103,7 @@
         objectLayer.inert = false;
         body.disabled = true; targets.inert = true;
         copy.setAttribute('aria-hidden','true');
-        lines.removeAttribute('src'); ceramic.removeAttribute('src');
+        lines.removeAttribute('src'); ceramic.onload = null; ceramic.removeAttribute('src');
         objects.forEach(item => {
             item.dataset.x = '0'; item.dataset.y = '0';
             item.style.setProperty('--drag-x','0px'); item.style.setProperty('--drag-y','0px');
@@ -101,9 +118,9 @@
         timer = setTimeout(() => {
             if (!active) return;
             phase = 'stars'; scene.dataset.phase = phase;
-            scene.classList.add('is-night'); targets.inert = false;
+            scene.classList.add('is-night'); targets.inert = false; syncTestState('stars');
             setCursor('default');
-        }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 2100);
+        }, matchMedia('(prefers-reduced-motion: reduce)').matches ? 50 : 550);
     });
     scene.addEventListener('pointerdown', e => {
         const item = e.target.closest('.night-object');
@@ -135,17 +152,19 @@
     stars.forEach((star,index)=>star.addEventListener('click',()=>{
         if (!active || phase!=='stars' || index!==connected) return;
         connected++;
+        setCursor('default');
         lines.src=`assets/Page7_车祸_asset/constellation(progressive)/constellation${connected}.png`;
         scene.dataset.connected=String(connected); updateStars();
         if (connected===stars.length) {
-            phase='complete'; scene.dataset.phase=phase;
-            ceramic.src='assets/Page7_车祸_asset/ceramic-turntable.gif';
-            ceramic.onload=()=>{
-                if (!active || phase!=='complete') return;
-                scene.classList.add('is-complete');copy.setAttribute('aria-hidden','false');
-            };
+            syncTestState('complete'); revealCeramic();
         }
     }));
+    targets.addEventListener('pointerover', e => {
+        if (phase === 'stars' && e.target.closest('.night-star.is-next')) setCursor('pointing');
+    });
+    targets.addEventListener('pointerout', e => {
+        if (e.target.closest('.night-star')) setCursor('default');
+    });
     scene.addEventListener('scroll',()=>{
         if (phase==='complete' && scene.scrollTop>scene.clientHeight*.25) scene.classList.add('is-reading');
     },{passive:true});
@@ -153,9 +172,50 @@
     window.addEventListener('mizuko:scenechange',e=>{
         active=e.detail.scene==='constellation';reset();
     });
-    window.mizukoConstellationExperience={getCursorMode};
+    const testStates = ['clearing', 'cleared', 'stars', 'complete'];
+    const enterTestState = value => {
+        if (!active || !window.mizukoNavigation.testMode) return false;
+        const state = testStates.includes(value) ? value : 'clearing';
+        reset();
+        if (state === 'cleared') {
+            objects.forEach((item, i) => {
+                const r = item.getBoundingClientRect();
+                const x = scene.clientWidth * (i % 2 ? .88 : .12) - (r.left + r.width / 2);
+                const y = scene.clientHeight * (.08 + Math.floor(i / 2) * .105) - (r.top + r.height / 2);
+                item.dataset.x = String(x); item.dataset.y = String(y);
+                item.style.setProperty('--drag-x', `${x}px`); item.style.setProperty('--drag-y', `${y}px`);
+            });
+            body.disabled = false; scene.classList.add('is-cleared');
+        } else if (state === 'stars' || state === 'complete') {
+            // A test jump should show a settled frame, not replay the body animation.
+            const previous = scene.style.display;
+            scene.style.display = 'none';
+            scene.classList.add('is-expanding', 'is-night');
+            void scene.offsetHeight;
+            scene.style.display = previous;
+            objectLayer.inert = true; body.disabled = true;
+            phase = 'stars'; scene.dataset.phase = phase; targets.inert = false;
+            if (state === 'complete') {
+                connected = stars.length; scene.dataset.connected = String(connected);
+                lines.src = `assets/Page7_车祸_asset/constellation(progressive)/constellation${connected}.png`;
+                updateStars(); revealCeramic();
+            }
+        }
+        syncTestState(state); setCursor('default');
+        return true;
+    };
+    const stepTest = direction => {
+        if (!window.mizukoNavigation.testMode) return false;
+        const state = phase === 'complete' ? 'complete' : phase === 'stars' ? 'stars' : scene.classList.contains('is-cleared') ? 'cleared' : 'clearing';
+        const index = testStates.indexOf(state) + direction;
+        if (index < 0) return window.mizukoNavigation.goTo('accident', { page: 4 });
+        if (index >= testStates.length) return false;
+        return enterTestState(testStates[index]);
+    };
+    window.mizukoConstellationExperience={getCursorMode, enterTestState, stepTest};
     active=window.mizukoExperience.getScene()==='constellation';reset();
-    Promise.all([body.querySelector('img').decode(), ...objects.map(item => item.querySelector('img').decode())]).then(() => {
+    if (active && window.mizukoNavigation.testMode) enterTestState(new URLSearchParams(location.search).get('nightState'));
+    Promise.all([body.querySelector('img').decode(), scene.querySelector('.night-body-large img').decode(), ...objects.map(item => item.querySelector('img').decode())]).then(() => {
         bodyMask = makeMask(body.querySelector('img'), [1271, 1080, 1248, 335]);
         objects.forEach(item => masks.set(item, makeMask(item.querySelector('img'))));
         if (active && phase === 'clearing') checkClear();
