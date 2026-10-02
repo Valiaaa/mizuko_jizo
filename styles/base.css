@@ -437,6 +437,7 @@ body.is-falling-settled .falling-section {
     width: var(--falling-ring-size);
     height: var(--falling-ring-size);
     object-fit: cover;
+    opacity: 0.2;
     transform: translate(-50%, -50%);
     transition:
         width 1200ms cubic-bezier(0.16, 1, 0.3, 1),
@@ -519,15 +520,12 @@ body.is-falling-settled .falling-section {
 .falling-object:is(:hover, :focus-within),
 .falling-object.is-previewing {
     z-index: 4;
-    animation-play-state: paused;
 }
 
 .falling-object:is(:hover, :focus-within) .falling-object__image,
 .falling-object.is-previewing .falling-object__image {
     opacity: 1;
-    filter: brightness(1.25) contrast(1.08);
-    scale: 1.055;
-    animation: falling-object-preview 850ms ease-in-out infinite alternate;
+    filter: none;
 }
 
 .falling-cursor {
@@ -699,11 +697,37 @@ body.is-next-scene .next-scene {
 
 .hell-stage__background {
     z-index: 0;
+    transform: scale(1.045);
+    filter: url('#hell-flame-wave') blur(0.45px) brightness(1.08);
+    animation: hell-firelight 2600ms ease-in-out infinite;
+    animation-play-state: paused;
 }
 
 .hell-stage__pattern {
     z-index: 3;
     opacity: 0.72;
+    animation: hell-star-shimmer 2400ms ease-in-out infinite;
+    animation-play-state: paused;
+}
+
+body.is-next-scene .hell-stage__background,
+body.is-next-scene .hell-stage__pattern { animation-play-state: running; }
+@keyframes hell-firelight {
+    0%, 100% { transform: scale(1.045) translate(-3px, 2px); filter: url('#hell-flame-wave') blur(.45px) brightness(1.02); }
+    27% { filter: url('#hell-flame-wave') blur(.7px) brightness(1.16); }
+    48% { transform: scale(1.055) translate(4px, -5px); filter: url('#hell-flame-wave') blur(.4px) brightness(1.07); }
+    73% { filter: url('#hell-flame-wave') blur(.6px) brightness(1.21); }
+}
+@keyframes hell-star-shimmer {
+    0%, 100% { opacity: .48; filter: drop-shadow(0 0 1px #c6aaaa33); }
+    33% { opacity: .88; filter: drop-shadow(0 0 3px #c6aaaa66); }
+    57% { opacity: .65; filter: drop-shadow(0 0 1px #c6aaaa33); }
+    81% { opacity: .74; filter: drop-shadow(0 0 2px #c6aaaa55); }
+}
+#hell-copy-caterpillar { white-space: nowrap; letter-spacing: .14em; }
+@media (prefers-reduced-motion: reduce) {
+    .hell-stage__background { animation: none; filter: brightness(1.08); }
+    .hell-stage__pattern { animation: none; }
 }
 
 .hell-object-field {
@@ -982,10 +1006,10 @@ body.is-hell-story .hell-story {
     height: 76%;
     margin: 0;
     color: rgba(239, 229, 229, 0.9);
-    font-family: Songti TC, serif;
+    font-family: 'ChillHuoFangSongConRegular', serif;
     font-size: clamp(14px, 1.52vw, 27px);
     font-weight: normal;
-    letter-spacing: 0.075em;
+    letter-spacing: -20%;
     line-height: 1.1;
     opacity: 1;
     overflow: hidden;
@@ -1968,11 +1992,13 @@ body.is-reflection-falling .custom-cursor {
 
 @keyframes falling-object-drift {
     from {
-        translate: -8px -6px;
+        translate: -24px -20px;
+        rotate: -5deg;
     }
 
     to {
-        translate: 9px 8px;
+        translate: 26px 24px;
+        rotate: 5deg;
     }
 }
 

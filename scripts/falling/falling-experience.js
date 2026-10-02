@@ -13,11 +13,12 @@
 
     const assetRoot = 'assets/Page3_Falling_asset/Falling_Objects/';
 
-    /*
-     * Add `animatedFile: "your-file.gif"` to any item when its final GIF is
-     * available. Until then, Hover uses the same drawing with a restrained
-     * motion treatment so the interaction can already be tested.
-     */
+    const solidRoot = 'assets/Page2_房间_asset/LayeringObjects/';
+    const solidExceptions = {
+        'F-beetle.png': 'LO-beatle.png', 'F-frame.png': 'LO_frame.png',
+        'F-ant.png': 'LO_ant.png', 'F-buddha.png': 'LO-statue.png',
+        'F-cup1.png': 'LO-cup.png'
+    };
     const fallingObjects = [
         { file: 'F-computer.png', x: 4, y: 10, width: 24, rotate: -8 },
         { file: 'F-flower1.png', x: 73, y: 40, width: 22, rotate: 12 },
@@ -57,14 +58,10 @@
         image.className = 'falling-object__image';
         image.src = `${assetRoot}${object.file}`;
         image.dataset.staticSrc = image.src;
+        image.dataset.solidSrc = solidRoot + (solidExceptions[object.file] || object.file.replace('F-', 'LO-'));
         image.alt = '';
         image.decoding = 'async';
         image.draggable = false;
-
-        if (object.animatedFile) {
-            image.dataset.animatedSrc =
-                `${assetRoot}${object.animatedFile}`;
-        }
 
         item.append(image);
         fragment.append(item);
@@ -82,8 +79,8 @@
         const image = item.querySelector('.falling-object__image');
         item.classList.add('is-previewing');
 
-        if (image?.dataset.animatedSrc) {
-            image.src = image.dataset.animatedSrc;
+        if (image?.dataset.solidSrc) {
+            image.src = image.dataset.solidSrc;
         }
     });
 
