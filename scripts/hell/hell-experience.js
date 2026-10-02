@@ -68,31 +68,27 @@
     reducedMotion.addEventListener('change', flickerEmbers);
     document.addEventListener('visibilitychange', flickerEmbers);
 
-    const startMotion = (item) => {
+    const motionReady = new WeakMap();
+    const prepareMotion = item => {
+        if (motionReady.has(item)) return motionReady.get(item);
         const motion = item.querySelector('.hell-object__motion');
-        const motionSource = item.dataset.motion;
-
-        if (
-            !motion ||
-            !motionSource ||
-            item.classList.contains('is-active')
-        ) {
-            return;
-        }
-
-        motion.src = '';
-        motion.src = `${motionSource}?play=${Date.now()}`;
-        item.classList.add('is-active');
+        if (!motion || !item.dataset.motion) return Promise.resolve(false);
+        motion.src = item.dataset.motion;
+        const ready = motion.decode().then(() => {
+            item.classList.add('is-motion-ready');
+            return true;
+        }).catch(() => false);
+        motionReady.set(item, ready);
+        return ready;
     };
-
-    const stopMotion = (item) => {
-        const motion = item.querySelector('.hell-object__motion');
-
+    // Keep decoded animation layers mounted so hovering never creates a blank frame.
+    objects.forEach(prepareMotion);
+    const startMotion = item => {
+        item.classList.add('is-active');
+        prepareMotion(item);
+    };
+    const stopMotion = item => {
         item.classList.remove('is-active');
-
-        if (motion) {
-            motion.removeAttribute('src');
-        }
     };
 
     const hasVisitedEveryDoor = () =>

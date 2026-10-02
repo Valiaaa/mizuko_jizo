@@ -36,6 +36,7 @@ body.is-next-scene .next-scene {
     pointer-events: none;
     user-select: none;
     -webkit-user-drag: none;
+    transition: opacity 180ms ease;
 }
 
 .hell-stage__background {
@@ -120,11 +121,11 @@ body.is-next-scene .hell-stage__pattern { animation-play-state: running; }
     z-index: 5;
 }
 
-.hell-object.is-active .hell-object__still {
+.hell-object.is-active.is-motion-ready .hell-object__still {
     opacity: 0;
 }
 
-.hell-object.is-active .hell-object__motion {
+.hell-object.is-active.is-motion-ready .hell-object__motion {
     opacity: 1;
 }
 

@@ -8,7 +8,7 @@
     pointer-events: none;
     overflow: hidden;
     overscroll-behavior: contain;
-    transition: opacity 900ms ease;
+    transition: opacity 450ms ease;
 }
 body.is-constellation-scene .constellation-scene { opacity: 1; visibility: visible; pointer-events: auto; }
 .night-depth { position: relative; height: 100vh; }
@@ -93,4 +93,10 @@ body.is-constellation-scene .constellation-scene { opacity: 1; visibility: visib
 @media (prefers-reduced-motion: reduce) {
     .night-viewport, .night-body-morph, .night-body-small, .night-body-large, .night-sky, .night-star-targets, .night-ceramic, .night-copy { transition-duration: 1ms; }
     .night-star.is-next, .is-expanding .night-body-morph, .is-reading .night-copy p { animation: none; }
+}
+
+body.is-constellation-scene .night-depth { animation: night-arrive 550ms ease-out; }
+@keyframes night-arrive { from { filter: blur(8px); } to { filter: blur(0); } }
+@media (prefers-reduced-motion: reduce) {
+    body.is-constellation-scene .night-depth { animation: none; }
 }

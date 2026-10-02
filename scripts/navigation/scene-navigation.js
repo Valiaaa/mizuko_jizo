@@ -73,7 +73,26 @@
         return goTo(mainStory[index + direction]);
     };
 
-    window.mizukoNavigation = { testMode, resolveScene, syncLocation, goTo, step };
+    const resetTestProgress = () => {
+        if (!testMode) return false;
+        try {
+            ['mizuko-room-test-progress-v1', 'mizuko-door-test-progress-v1', 'mizuko-accident-test-page']
+                .forEach(key => localStorage.removeItem(key));
+        } catch {}
+        const url = new URL(location.href);
+        const current = window.mizukoExperience.getScene();
+        const scene = current.startsWith('door-') ? 'doors' : current;
+        url.searchParams.set('test', '1');
+        url.searchParams.set('scene', scene);
+        url.searchParams.set('reset', '1');
+        ['phase', 'accidentPage', 'nightState', 'visited'].forEach(key => url.searchParams.delete(key));
+        if (scene === 'room') url.searchParams.set('phase', '1');
+        if (scene === 'accident') url.searchParams.set('accidentPage', '1');
+        if (scene === 'constellation') url.searchParams.set('nightState', 'clearing');
+        location.replace(url.href);
+        return true;
+    };
+    window.mizukoNavigation = { testMode, resolveScene, syncLocation, goTo, step, resetTestProgress };
     window.addEventListener('mizuko:scenechange', (event) => {
         const scene = event.detail.scene;
         const surfaces = {
@@ -92,6 +111,11 @@
         });
     });
     window.addEventListener('keydown', (event) => {
+        if (testMode && !event.defaultPrevented && !event.repeat && event.shiftKey &&
+            !event.altKey && !event.ctrlKey && !event.metaKey && event.key.toLowerCase() === 'r' &&
+            !event.target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) {
+            event.preventDefault(); resetTestProgress(); return;
+        }
         if (!testMode || event.defaultPrevented || event.repeat ||
             event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
             event.target.closest?.('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
