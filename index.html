@@ -6,14 +6,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <title>水子地藏</title>
-    <link rel="preload" href="assets/cursor/default-cursor.png" as="image">
+    <link rel="preload" href="assets/cursor/default.png" as="image">
     <link rel="preload" href="assets/cursor/key.png" as="image">
     <link rel="preload" href="assets/cursor/pointer.png" as="image">
     <link rel="preload" href="assets/cursor/Mouse_HandNormal.png" as="image">
     <link rel="preload" href="assets/cursor/Mouse_HandGrab.png" as="image">
     <link rel="preload" href="assets/cursor/eye.png" as="image">
 
-    <link rel="stylesheet" href="styles/base.css?v=20261002-hell-faster">
+    <link rel="stylesheet" href="styles/base.css?v=20261002-texture-hd">
 </head>
 
 <body>
@@ -83,223 +83,223 @@
             <div class="interaction-layer" aria-hidden="true"></div>
         </div>
     </div>
-    <section
-        id="falling-section"
-        class="falling-section"
-        aria-hidden="true"
-    >
-        <div class="falling-sticky" aria-hidden="true">
-            <img
-                class="falling-ring"
-                src="assets/Page3_Falling_asset/Falling_BgLoop.gif"
-                alt=""
-                draggable="false"
-            >
-            <p class="falling-copy">
-                又一次地、一次一次地陷入重复的梦魇里。
-            </p>
-            <span class="falling-scroll-cue" aria-hidden="true">›</span>
-        </div>
-
-        <div class="falling-object-field" aria-label="下坠的物品"></div>
-
-        <div class="abyss-zone">
-            <p class="abyss-copy">再往下一点</p>
-            <button
-                class="abyss-hole"
-                type="button"
-                aria-label="进入下一个场景"
-            >
-                <span class="abyss-hole__rim" aria-hidden="true"></span>
-            </button>
-        </div>
-
-        <img
-            class="falling-cursor"
-            src="assets/Page3_Falling_asset/Falling_Mouse.gif"
-            alt=""
+        <section
+            id="falling-section"
+            class="falling-section"
             aria-hidden="true"
-            draggable="false"
         >
-    </section>
-
-    <section id="next-scene" class="next-scene" aria-hidden="true">
-        <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
-            <defs>
-                <filter id="hell-flame-wave" x="-8%" y="-8%" width="116%" height="116%">
-                    <feTurbulence type="fractalNoise" baseFrequency="0.008 0.018" numOctaves="2" seed="7" result="wave">
-                        <animate attributeName="baseFrequency" values="0.008 0.018;0.011 0.022;0.008 0.018" dur="3.5s" repeatCount="indefinite" />
-                    </feTurbulence>
-                    <feDisplacementMap in="SourceGraphic" in2="wave" scale="16" xChannelSelector="R" yChannelSelector="G" />
-                </filter>
-            </defs>
-        </svg>
-        <div class="hell-stage">
-            <img
-                class="hell-stage__background"
-                src="assets/Page4_地狱_asset/bg.jpg"
-                alt=""
-                draggable="false"
-            >
-
-            <div class="hell-object-field" aria-label="地狱中的孩子们">
-                <button
-                    class="hell-object hell-object--strawberry"
-                    type="button"
-                    aria-describedby="hell-copy-strawberry"
-                    data-motion="assets/Page4_地狱_asset/motion/strawberry.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/strawberry.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-strawberry" class="hell-object__copy">可以再看我一眼吗？</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--mud"
-                    type="button"
-                    aria-describedby="hell-copy-mud"
-                    data-motion="assets/Page4_地狱_asset/motion/mud.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/mud.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-mud" class="hell-object__copy">有一点痛···不，不痛的。</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--infant"
-                    type="button"
-                    aria-describedby="hell-copy-infant"
-                    data-motion="assets/Page4_地狱_asset/motion/infant.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/infant.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-infant" class="hell-object__copy">不要抛弃我！不要！</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--twins"
-                    type="button"
-                    aria-describedby="hell-copy-twins"
-                    data-motion="assets/Page4_地狱_asset/motion/twins.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/twins.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-twins" class="hell-object__copy">我们要在这地狱里直到永远吗？<br>还是说，会有人找到我们？</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--candle"
-                    type="button"
-                    aria-describedby="hell-copy-candle"
-                    data-motion="assets/Page4_地狱_asset/motion/candle.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/candle.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-candle" class="hell-object__copy">我会变好的！拜托请相信我！</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--caterpillar"
-                    type="button"
-                    aria-describedby="hell-copy-caterpillar"
-                    data-motion="assets/Page4_地狱_asset/motion/caterpillar.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/caterpillar.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-caterpillar" class="hell-object__copy" aria-label="省略号">······</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--flower"
-                    type="button"
-                    aria-describedby="hell-copy-flower"
-                    data-motion="assets/Page4_地狱_asset/motion/flower.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/flower.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-flower" class="hell-object__copy">身上有什么东西···好害怕···</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--balloon"
-                    type="button"
-                    aria-describedby="hell-copy-balloon"
-                    data-motion="assets/Page4_地狱_asset/motion/balloon.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/balloon.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-balloon" class="hell-object__copy">飘啊···飘啊···<br>我会飘去哪里？</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--heart"
-                    type="button"
-                    aria-describedby="hell-copy-heart"
-                    data-motion="assets/Page4_地狱_asset/motion/heart.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/heart.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-heart" class="hell-object__copy">想要离开这里，可是，为什么无论怎么走，都看不到尽头？</span>
-                </button>
-
-                <button
-                    class="hell-object hell-object--hood"
-                    type="button"
-                    aria-describedby="hell-copy-hood"
-                    data-motion="assets/Page4_地狱_asset/motion/hood.webp"
-                >
-                    <img class="hell-object__still" src="assets/Page4_地狱_asset/still/hood.png" alt="" draggable="false">
-                    <img class="hell-object__motion" alt="" draggable="false">
-                    <span id="hell-copy-hood" class="hell-object__copy">蜕皮···死亡···新生···</span>
-                </button>
-            </div>
-
-            <img
-                class="hell-stage__pattern"
-                src="assets/Page4_地狱_asset/pattern.png"
-                alt=""
-                draggable="false"
-            >
-
-            <button
-                class="hell-mizuko"
-                type="button"
-                aria-label="凝视水子"
-            >
+            <div class="falling-sticky" aria-hidden="true">
                 <img
-                    src="assets/Page4_地狱_asset/mizuko.png"
-                    alt="水子"
+                    class="falling-ring"
+                    src="assets/Page3_Falling_asset/Falling_BgLoop.gif"
+                    alt=""
                     draggable="false"
                 >
-            </button>
-
-            <div class="hell-story" aria-hidden="true">
-                <div class="hell-story__shade" aria-hidden="true"></div>
-
-                <p class="hell-story__narrative">
-                    睁开眼，发现自己身处一个全然陌生的地方。<br><br>
-地狱火，曼陀罗，满目猩红。环顾四周，无一个人影，只有自己。<br><br>
-潜意识里有某种直觉引导着往前走，每行一步，赤足的足底都被熔岩烧得黑焦，可是感觉不到痛。唯有脑海中一个声音呼唤着。<br><br>
-漫步了好久好久。<br><br>
-终于，在地狱深处，见到另一个人形的轮廓，我心中一紧，几欲快步前行，脚步却不由自主地慢了下来。再靠近数步，那个人形便清晰地显现了。<br><br>
-那是我的孩子。<br><br>
-周身覆盖鲜血，淋漓不止中显露出弱小的身体，晶莹如玉而柔软的，尚未完全长成一个人类模样的小小胚胎。它的面容看不清楚，不知怎的，却从中辨认出我的容貌，与一点点他的影子。<br><br>
-听见我来，孩子抬起了头。那张纯洁、乖巧的小脸上有目无仁。<br><br>
-孩子哀哀低泣着：
+                <p class="falling-copy">
+                    又一次地、一次一次地陷入重复的梦魇里。
                 </p>
+                <span class="falling-scroll-cue" aria-hidden="true">›</span>
+            </div>
 
-                <p class="hell-story__accusation">
-                    你为什么不要我，为什么要杀我？
-                </p>
+            <div class="falling-object-field" aria-label="下坠的物品"></div>
+
+            <div class="abyss-zone">
+                <p class="abyss-copy">再往下一点</p>
+                <button
+                    class="abyss-hole"
+                    type="button"
+                    aria-label="进入下一个场景"
+                >
+                    <span class="abyss-hole__rim" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <img
+                class="falling-cursor"
+                src="assets/Page3_Falling_asset/Falling_Mouse.gif"
+                alt=""
+                aria-hidden="true"
+                draggable="false"
+            >
+        </section>
+
+        <section id="next-scene" class="next-scene" aria-hidden="true">
+            <svg width="0" height="0" aria-hidden="true" style="position:absolute;pointer-events:none">
+                <defs>
+                    <filter id="hell-flame-wave" x="-8%" y="-8%" width="116%" height="116%">
+                        <feTurbulence type="fractalNoise" baseFrequency="0.008 0.018" numOctaves="2" seed="7" result="wave">
+                            <animate attributeName="baseFrequency" values="0.008 0.018;0.011 0.022;0.008 0.018" dur="3.5s" repeatCount="indefinite" />
+                        </feTurbulence>
+                        <feDisplacementMap in="SourceGraphic" in2="wave" scale="16" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
+                </defs>
+            </svg>
+            <div class="hell-stage">
+                <img
+                    class="hell-stage__background"
+                    src="assets/Page4_地狱_asset/bg.jpg"
+                    alt=""
+                    draggable="false"
+                >
+
+                <div class="hell-object-field" aria-label="地狱中的孩子们">
+                    <button
+                        class="hell-object hell-object--strawberry"
+                        type="button"
+                        aria-describedby="hell-copy-strawberry"
+                        data-motion="assets/Page4_地狱_asset/motion/strawberry.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/strawberry.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-strawberry" class="hell-object__copy">可以再看我一眼吗？</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--mud"
+                        type="button"
+                        aria-describedby="hell-copy-mud"
+                        data-motion="assets/Page4_地狱_asset/motion/mud.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/mud.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-mud" class="hell-object__copy">有一点痛···不，不痛的。</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--infant"
+                        type="button"
+                        aria-describedby="hell-copy-infant"
+                        data-motion="assets/Page4_地狱_asset/motion/infant.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/infant.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-infant" class="hell-object__copy">不要抛弃我！不要！</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--twins"
+                        type="button"
+                        aria-describedby="hell-copy-twins"
+                        data-motion="assets/Page4_地狱_asset/motion/twins.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/twins.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-twins" class="hell-object__copy">我们要在这地狱里直到永远吗？<br>还是说，会有人找到我们？</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--candle"
+                        type="button"
+                        aria-describedby="hell-copy-candle"
+                        data-motion="assets/Page4_地狱_asset/motion/candle.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/candle.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-candle" class="hell-object__copy">我会变好的！拜托请相信我！</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--caterpillar"
+                        type="button"
+                        aria-describedby="hell-copy-caterpillar"
+                        data-motion="assets/Page4_地狱_asset/motion/caterpillar.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/caterpillar.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-caterpillar" class="hell-object__copy" aria-label="省略号">······</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--flower"
+                        type="button"
+                        aria-describedby="hell-copy-flower"
+                        data-motion="assets/Page4_地狱_asset/motion/flower.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/flower.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-flower" class="hell-object__copy">身上有什么东西···好害怕···</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--balloon"
+                        type="button"
+                        aria-describedby="hell-copy-balloon"
+                        data-motion="assets/Page4_地狱_asset/motion/balloon.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/balloon.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-balloon" class="hell-object__copy">飘啊···飘啊···<br>我会飘去哪里？</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--heart"
+                        type="button"
+                        aria-describedby="hell-copy-heart"
+                        data-motion="assets/Page4_地狱_asset/motion/heart.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/heart.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-heart" class="hell-object__copy">想要离开这里，可是，为什么无论怎么走，都看不到尽头？</span>
+                    </button>
+
+                    <button
+                        class="hell-object hell-object--hood"
+                        type="button"
+                        aria-describedby="hell-copy-hood"
+                        data-motion="assets/Page4_地狱_asset/motion/hood.webp"
+                    >
+                        <img class="hell-object__still" src="assets/Page4_地狱_asset/still/hood.png" alt="" draggable="false">
+                        <img class="hell-object__motion" alt="" draggable="false">
+                        <span id="hell-copy-hood" class="hell-object__copy">蜕皮···死亡···新生···</span>
+                    </button>
+                </div>
+
+                <img
+                    class="hell-stage__pattern"
+                    src="assets/Page4_地狱_asset/pattern.png"
+                    alt=""
+                    draggable="false"
+                >
 
                 <button
-                    class="hell-story__advance"
+                    class="hell-mizuko"
                     type="button"
-                    aria-label="继续倾听"
-                ></button>
+                    aria-label="凝视水子"
+                >
+                    <img
+                        src="assets/Page4_地狱_asset/mizuko.png"
+                        alt="水子"
+                        draggable="false"
+                    >
+                </button>
+
+                <div class="hell-story" aria-hidden="true">
+                    <div class="hell-story__shade" aria-hidden="true"></div>
+
+                    <p class="hell-story__narrative">
+                        睁开眼，发现自己身处一个全然陌生的地方。<br><br>
+    地狱火，曼陀罗，满目猩红。环顾四周，无一个人影，只有自己。<br><br>
+    潜意识里有某种直觉引导着往前走，每行一步，赤足的足底都被熔岩烧得黑焦，可是感觉不到痛。唯有脑海中一个声音呼唤着。<br><br>
+    漫步了好久好久。<br><br>
+    终于，在地狱深处，见到另一个人形的轮廓，我心中一紧，几欲快步前行，脚步却不由自主地慢了下来。再靠近数步，那个人形便清晰地显现了。<br><br>
+    那是我的孩子。<br><br>
+    周身覆盖鲜血，淋漓不止中显露出弱小的身体，晶莹如玉而柔软的，尚未完全长成一个人类模样的小小胚胎。它的面容看不清楚，不知怎的，却从中辨认出我的容貌，与一点点他的影子。<br><br>
+    听见我来，孩子抬起了头。那张纯洁、乖巧的小脸上有目无仁。<br><br>
+    孩子哀哀低泣着：
+                    </p>
+
+                    <p class="hell-story__accusation">
+                        你为什么不要我，为什么要杀我？
+                    </p>
+
+                    <button
+                        class="hell-story__advance"
+                        type="button"
+                        aria-label="继续倾听"
+                    ></button>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
     <section id="door-section" class="door-section" aria-hidden="true">
         <div class="door-hall" aria-label="三扇门">
             <div class="door-row">
@@ -429,7 +429,7 @@
         <section id="door-room-2" class="door-room" data-room="2" aria-hidden="true">
             <div class="offering-stage" aria-label="供奉水子">
                 <p class="offering-prayer">我不求功名，不求庇佑，惟愿你位列仙班，福泽深厚，从此不受苦痛。我愿长久供奉你以赎我的罪。我的孩子。</p>
-                <img class="offering-rings" src="assets/Page5.2_供奉_asset/offering-rings.svg" alt="" aria-hidden="true" draggable="false">
+                <img class="offering-rings" src="assets/Page3_Falling_asset/Falling_BgLoop.gif" alt="" aria-hidden="true" draggable="false">
                 <button class="offering-mizuko" type="button" data-return-doors aria-label="水子，返回三扇门">
                     <img class="offering-mizuko__image is-current" data-mizuko="Plain" src="assets/Page5.2_供奉_asset/水子石像/Mizuko_Plain.png" alt="" aria-hidden="false" draggable="false">
                     <img class="offering-mizuko__image" data-mizuko="1" src="assets/Page5.2_供奉_asset/水子石像/Mizuko1.png" alt="" aria-hidden="true" draggable="false">
@@ -653,7 +653,7 @@
     <div class="custom-cursor" aria-hidden="true">
         <img
             class="custom-cursor__image custom-cursor__image--default"
-            src="assets/cursor/default-cursor.png"
+            src="assets/cursor/default.png"
             alt=""
         >
         <img
@@ -680,9 +680,9 @@
     </div>
 
     <script src="scripts/navigation/scene-navigation.js?v=20261001-accident-four" defer></script>
-    <script src="scripts/room/room-experience.js?v=20261002-door-key" defer></script>
+    <script src="scripts/room/room-experience.js?v=20261002-ordered-doors" defer></script>
     <script src="scripts/falling/falling-experience.js?v=20261002-solid-floating" defer></script>
-    <script src="scripts/hell/hell-experience.js?v=20261001-navigation" defer></script>
+    <script src="scripts/hell/hell-experience.js?v=20261002-ordered-doors" defer></script>
     <script src="scripts/accident/accident-experience.js?v=20261001-accident-four" defer></script>
     <script src="scripts/accident/constellation-experience.js?v=20261001-night-hitmask" defer></script>
     <script src="scripts/reflection/reflection-experience.js?v=20261001-reflection-soft" defer></script>

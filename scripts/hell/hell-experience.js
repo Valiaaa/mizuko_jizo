@@ -97,6 +97,10 @@
 
     const hasVisitedEveryDoor = () =>
         [1, 2, 3].every((door) => visitedDoors.has(door));
+    const canOpenDoor = (door) => door === 1 ||
+        (door === 2 && visitedDoors.has(1)) ||
+        (door === 3 && visitedDoors.has(1) && visitedDoors.has(2)) ||
+        (door === 4 && hasVisitedEveryDoor());
 
     const animateDoorReflection = (timestamp) => {
         if (!doorReflectionAnimation || !doorReflection) {
@@ -206,6 +210,8 @@
         doorCards.forEach((card) => {
             const doorNumber = Number(card.dataset.door);
             const isVisited = visitedDoors.has(doorNumber);
+            card.disabled = !canOpenDoor(doorNumber);
+            card.setAttribute('aria-disabled', String(card.disabled));
             card.classList.toggle('is-visited', isVisited);
             card.setAttribute(
                 'aria-label',
@@ -237,6 +243,10 @@
     };
 
     const showDoorHall = (options = {}) => {
+        if (activeDoor >= 1 && activeDoor <= 3) {
+            visitedDoors.add(activeDoor);
+            saveDoorProgress();
+        }
         stopEmbers();
         objects.forEach(stopMotion);
         storyPhase = 3;
@@ -268,13 +278,8 @@
             return;
         }
 
-        if (doorNumber === 4 && !hasVisitedEveryDoor()) {
+        if (!canOpenDoor(doorNumber)) {
             return;
-        }
-
-        if (doorNumber <= 3) {
-            visitedDoors.add(doorNumber);
-            saveDoorProgress();
         }
 
         activeDoor = doorNumber;
@@ -352,7 +357,7 @@
 
     const showScene = (target) => {
         const doorMatch = /^door-([1-4])$/.exec(target);
-        if (target === 'door-4' && !hasVisitedEveryDoor()) return false;
+        if (doorMatch && !canOpenDoor(Number(doorMatch[1]))) return false;
         if (!['next', 'hell-story', 'hell-accusation', 'doors'].includes(target) && !doorMatch) return false;
         resetStory();
         window.mizukoFallingExperience.enterNextScene({ immediate: true });
@@ -452,8 +457,5 @@
     restoreDoorProgress();
     renderDoorProgress();
     window.mizukoHellExperience = { showScene, hasVisitedEveryDoor };
-    if (initialScene === 'door-4') {
-        [1, 2, 3].forEach((door) => visitedDoors.add(door));
-    }
-    showScene(initialScene);
+    if (!showScene(initialScene) && /^door-[1-4]$/.test(initialScene)) showScene('doors');
 })();

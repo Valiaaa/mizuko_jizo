@@ -111,3 +111,7 @@ Test 进度独立写入 `mizuko-room-test-progress-v1` 和 `mizuko-door-test-pro
 第四房间由 `door-room-4` 自身纵向滚动，内容长度为 660vh。七段文字按用户提供的顺序散布，最后一句置于页面底端；中段约 40%–79% 的滚动进度播放 `Page6_Falling2_asset/rotate_anim.gif`，离开该区域停止显示，重新进入重播。背景和人物光标复用 `Page3_Falling_asset`；Page 6 内字节完全相同的 `Falling_BgLoop.gif`、`Falling_Mouse.gif` 已删除。整个体验只保留一个 `.falling-cursor`，由第一次坠落脚本挂到 body 后共同使用。离开第四房间清理动画、监听观察和光标显示，重新进入从顶端开始。
 
 第四房间的撕裂动画以绝对定位和自身中心旋转校准到视口中心；撕裂动画透明度为 0.45，自滚动中段出现后保留至底部；两个低透明度（0.075）背景圈分别位于右上和左下，继续复用同一 GIF。末尾文字为可键盘激活的按钮，hover／聚焦时人物光标切换为眼睛，仅“受苦受难”变为暗红色。点击进入 `accident` 场景，使用 Page 7 四张 layout reference 的竖排结构和对应 debris_page1–4 独立素材，文字为可选择的网页文字。碎石置于文字上方，支持指针拖动、手／抓取光标和聚焦后的方向键移动。四个关键词 hover 变为 #9f0808，点击显示眼睛光标 500ms，再淡入下一画面。测试 URL 使用 accidentPage 保存画面，普通模式与测试模式分别保存进度。最后一句进入 `constellation` 的白色清物阶段，复用房间 LayeringObjects 18 件素材，盖住 LyingBody_small。通过图像透明度遮罩判断真实遮挡，忽略透明外框和不足 0.5% 的细小边缘；所有物品的可见图案移离身体后才能点击，解锁时将身体按钮提升至物品上方以避免透明边缘截获点击，身体放大并淡入 LyingBody_large，背景转黑。依次点击 20 个星星热区使用 constellation1–20 图层连线，当前目标略微发亮。完成后加载 ceramic-turntable.gif 于画面中央，GIF 加载成功才开启滚动与下方夜晚文字。进入／退出场景会重置连线、拖动和动画，未完成时始终锁定滚动。
+
+叙述文案以用户当前更新版为准，已从 index.html 同步至 src/sections/falling/falling.html；后续不得按旧文档还原。门的黑色门缝置于门图片下方（void z-index 0，图片 z-index 1）。
+
+门按 1 → 2 → 3 解锁：visitedDoors 表示已进入并返回门厅的房间，单纯进入不记为完成。未解锁的门使用 disabled，hover 不开门且不显示钥匙；showScene/openDoorRoom 同样检查前置进度，阻止方向键或直接 URL 绕过。已有保存进度保留。

@@ -27,8 +27,8 @@
 }
 
 :root {
-    --cursor-default: url('../assets/cursor/default-cursor.png') 12 12, auto;
-    --cursor-key: url('../assets/cursor/key-cursor.png') 12 12, pointer;
+    --cursor-default: auto;
+    --cursor-key: pointer;
 }
 
 .has-custom-cursor,
@@ -1159,7 +1159,7 @@ body.is-door-room .door-hall {
     top: 4%;
     right: 7.8%;
     bottom: 3.5%;
-    z-index: 2;
+    z-index: 0;
     width: 4.5%;
     background: #000;
     clip-path: inset(0 0 0 100%);
@@ -1167,7 +1167,7 @@ body.is-door-room .door-hall {
     transition: clip-path 620ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.door-card:is(:hover, :focus-visible) .door-card__void,
+.door-card:not(:disabled):is(:hover, :focus-visible) .door-card__void,
 .door-card.is-visited .door-card__void {
     clip-path: inset(0);
 }
@@ -1187,7 +1187,7 @@ body.is-door-room .door-hall {
     -webkit-user-drag: none;
 }
 
-.door-card:is(:hover, :focus-visible) .door-card__still,
+.door-card:not(:disabled):is(:hover, :focus-visible) .door-card__still,
 .door-card.is-visited .door-card__still {
     transform: translateX(-4%) perspective(900px) rotateY(-10deg);
 }
@@ -1440,12 +1440,15 @@ body.has-fourth-door .door-reflection:is(:hover, :focus-visible) .door-reflectio
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 54cqh;
-    height: 54cqh;
+    width: 74cqh;
+    height: 74cqh;
     transform: translate(-50%, -50%);
     animation: offering-rings-turn 100s linear infinite;
     animation-play-state: paused;
     pointer-events: none;
+    object-fit: cover;
+    filter: grayscale(1) invert(1);
+    opacity: 0.35;
 }
 
 .offering-mizuko {

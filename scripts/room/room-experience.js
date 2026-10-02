@@ -662,7 +662,7 @@
             }
 
             if (currentScene !== 'room') {
-                if (currentScene === 'doors' && document.elementFromPoint(clientX, clientY)?.closest('.door-card, .door-reflection')) {
+                if (currentScene === 'doors' && document.elementFromPoint(clientX, clientY)?.closest('.door-card:not(:disabled), .door-reflection')) {
                     setCursorMode('key');
                     return;
                 }
