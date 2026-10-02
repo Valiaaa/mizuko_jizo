@@ -294,3 +294,6 @@
     }
 }
 
+
+/* Only room artwork blends; the separate object layer changes immediately. */
+.room-image-outgoing { position: absolute; inset: 0; pointer-events: none; }

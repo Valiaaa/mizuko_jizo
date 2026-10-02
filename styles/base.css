@@ -1,7 +1,7 @@
 /* Stylesheet entry point. Keep this order to preserve the cascade.
  * Edit the scene files below; shared late overrides live in scene-support.css. */
 @import url("./foundation.css?v=20261002-css-split");
-@import url("./room.css?v=20261002-css-split");
+@import url("./room.css?v=20261002-blur-rooms");
 @import url("./falling.css?v=20261002-css-split");
 @import url("./hell.css?v=20261002-smooth-hover");
 @import url("./doors.css?v=20261002-css-split");

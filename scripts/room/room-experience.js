@@ -8,6 +8,9 @@
         const customCursor = document.querySelector('.custom-cursor');
         const fallingSection = document.querySelector('#falling-section');
         const nextScene = document.querySelector('#next-scene');
+        let roomPaintVersion = 0;
+        let roomHasPainted = false;
+        const roomAnimations = [];
         const roomCount = 6;
         const finalPhase = roomCount + 1;
         const navigation = window.mizukoNavigation;
@@ -797,6 +800,21 @@
             savedLayers = null,
             savedConvergence = null
         ) {
+            const previousPhase = phase;
+            const version = ++roomPaintVersion;
+            roomAnimations.splice(0).forEach(animation => animation.cancel());
+            roomStage.querySelectorAll('.room-image-outgoing').forEach(image => image.remove());
+            rooms.style.removeProperty('opacity');
+            const animateRoom = roomHasPainted && previousPhase !== nextPhase &&
+                !matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const outgoing = animateRoom ? rooms.cloneNode(false) : null;
+            if (outgoing) {
+                outgoing.classList.add('room-image-outgoing');
+                outgoing.setAttribute('aria-hidden', 'true');
+                roomStage.insertBefore(outgoing, rooms.nextSibling);
+                rooms.style.opacity = '0';
+            }
+            roomHasPainted = true;
             phase = Math.max(1, Math.min(finalPhase, nextPhase));
 
             if (phase <= roomCount) {
@@ -814,6 +832,23 @@
                 roomStage.classList.add('is-drag-phase');
             }
 
+            if (outgoing) {
+                rooms.decode().catch(() => {}).then(() => {
+                    if (version !== roomPaintVersion) return;
+                    const timing = { duration: 550, easing: 'ease-out' };
+                    rooms.style.removeProperty('opacity');
+                    const incomingAnimation = rooms.animate([
+                        { opacity: 0, filter: 'blur(8px)' },
+                        { opacity: 1, filter: 'blur(0px)' }
+                    ], timing);
+                    const outgoingAnimation = outgoing.animate([
+                        { opacity: 1, filter: 'blur(0px)' },
+                        { opacity: 0, filter: 'blur(8px)' }
+                    ], { ...timing, fill: 'forwards' });
+                    roomAnimations.push(incomingAnimation, outgoingAnimation);
+                    outgoingAnimation.finished.then(() => outgoing.remove()).catch(() => {});
+                });
+            }
             renderLayerObjects(phase);
             applySavedLayerState(savedLayers);
 
