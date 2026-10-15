@@ -97,3 +97,14 @@ body.is-constellation-scene .accident-stage { filter: blur(8px); }
 @media (prefers-reduced-motion: reduce) {
     .accident-scene, .accident-stage { transition-duration: 1ms; }
 }
+
+.accident-keyword { transition: color 300ms ease, text-shadow 450ms ease, filter 450ms ease; }
+.accident-keyword:is(:hover, :focus-visible), .accident-keyword.is-chosen {
+    text-shadow: 0 0 5px #9f080870, 0 0 13px #9f080850, 0 0 26px #9f080830;
+    filter: drop-shadow(0 0 4px #9f080840);
+}
+
+.accident-keyword { filter: blur(.45px); }
+.accident-keyword:is(:hover, :focus-visible), .accident-keyword.is-chosen {
+    filter: blur(.6px) drop-shadow(0 0 4px #9f080840);
+}

@@ -272,3 +272,8 @@ body.is-entering-next-scene .falling-cursor {
     pointer-events: none;
 }
 
+
+/* Match the 708px solid canvas to the 657px outline canvas at the same pixel scale. */
+.falling-object--computer { aspect-ratio: 657 / 718; }
+.falling-object--computer .falling-object__image { position: absolute; inset: 0 auto auto 0; width: 100%; height: 100%; }
+.falling-object--computer.is-previewing .falling-object__image { width: 107.762557%; }

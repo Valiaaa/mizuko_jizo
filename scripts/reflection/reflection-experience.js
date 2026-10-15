@@ -8,9 +8,7 @@
     const tear = room.querySelector('.reflection-depth__tear img');
     const texts = [...room.querySelectorAll('.reflection-depth__text')];
     let active = false;
-    let tearing = false;
     let scrollFrame = 0;
-    let playback = 0;
     const setEndingEye = (enabled) => {
         document.body.classList.toggle('is-reflection-eye', enabled);
         if (enabled) {
@@ -33,15 +31,9 @@
         if (!active) return;
         const range = room.scrollHeight - room.clientHeight;
         const progress = range > 0 ? room.scrollTop / range : 0;
-        const showTear = progress >= 0.4;
-        if (showTear === tearing) return;
-        tearing = showTear;
-        depth.classList.toggle('is-tearing', showTear);
-        if (showTear) {
-            tear.src = `assets/Page6_Falling2_asset/rotate_anim.gif?play=${++playback}`;
-        } else {
-            tear.removeAttribute('src');
-        }
+        const visibility = Math.min(1, Math.max(0, progress / 0.5));
+        depth.style.setProperty('--tear-opacity', String(visibility * 0.45));
+
     };
 
     const setActive = (isActive) => {
@@ -51,11 +43,11 @@
         window.cancelAnimationFrame(scrollFrame);
         scrollFrame = 0;
         observer.disconnect();
-        tearing = false;
-        depth.classList.remove('is-tearing');
+        depth.style.setProperty('--tear-opacity', '0');
         tear.removeAttribute('src');
         if (active) {
             room.scrollTop = 0;
+            tear.src = 'assets/Page6_Falling2_asset/rotate_anim.gif';
             rings.forEach((image) => image.src = 'assets/Page3_Falling_asset/Falling_BgLoop.gif');
             texts.forEach((text) => {
                 text.classList.remove('is-visible');

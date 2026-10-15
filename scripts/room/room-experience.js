@@ -795,6 +795,44 @@
             }
         }
 
+        function disperseRoom(outgoing, incoming, version) {
+            const dust = document.createElement('canvas');
+            dust.className = 'room-transition-dust'; dust.setAttribute('aria-hidden', 'true');
+            const width = roomStage.clientWidth, height = roomStage.clientHeight;
+            const ratio = Math.min(devicePixelRatio || 1, 2);
+            dust.width = width * ratio; dust.height = height * ratio;
+            const context = dust.getContext('2d'); context.scale(ratio, ratio);
+            const buffer = document.createElement('canvas'); buffer.width = 320; buffer.height = 180;
+            const sample = buffer.getContext('2d', { willReadFrequently: true });
+            const points = [];
+            [outgoing, incoming].forEach((image, layer) => {
+                sample.clearRect(0,0,320,180); sample.drawImage(image,0,0,320,180);
+                const pixels = sample.getImageData(0,0,320,180).data;
+                for(let y=0;y<180;y+=3) for(let x=0;x<320;x+=3) {
+                    const n=(y*320+x)*4;
+                    if(pixels[n+3]<60 || Math.max(pixels[n],pixels[n+1],pixels[n+2])<65) continue;
+                    points.push({x:x/320*width,y:y/180*height,layer,
+                        dx:(Math.random()-.5)*65,dy:(Math.random()-.5)*50,
+                        color:`rgb(${pixels[n]},${pixels[n+1]},${pixels[n+2]})`});
+                }
+            });
+            roomStage.append(dust);
+            const started=performance.now();
+            const paint=now=>{
+                if(version!==roomPaintVersion || currentScene!=='room') {dust.remove();return;}
+                const t=Math.min(1,(now-started)/2100); context.clearRect(0,0,width,height);
+                for(const point of points) {
+                    const local=point.layer===0?Math.min(1,t/.62):Math.max(0,(t-.38)/.62);
+                    const spread=point.layer===0?local:1-local;
+                    context.globalAlpha=Math.sin(local*Math.PI)*.36;
+                    context.fillStyle=point.color;
+                    context.fillRect(point.x+point.dx*spread,point.y+point.dy*spread,1.3+spread,1.3+spread);
+                }
+                if(t<1) requestAnimationFrame(paint); else dust.remove();
+            };
+            requestAnimationFrame(paint);
+        }
+
         function showPhase(
             nextPhase,
             savedLayers = null,
@@ -803,7 +841,7 @@
             const previousPhase = phase;
             const version = ++roomPaintVersion;
             roomAnimations.splice(0).forEach(animation => animation.cancel());
-            roomStage.querySelectorAll('.room-image-outgoing').forEach(image => image.remove());
+            roomStage.querySelectorAll('.room-image-outgoing, .room-transition-dust').forEach(image => image.remove());
             rooms.style.removeProperty('opacity');
             const animateRoom = roomHasPainted && previousPhase !== nextPhase &&
                 !matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -835,15 +873,18 @@
             if (outgoing) {
                 rooms.decode().catch(() => {}).then(() => {
                     if (version !== roomPaintVersion) return;
-                    const timing = { duration: 550, easing: 'ease-out' };
+                    const timing = { duration: 2100, easing: 'cubic-bezier(.22,.61,.36,1)' };
+                    disperseRoom(outgoing, rooms, version);
                     rooms.style.removeProperty('opacity');
                     const incomingAnimation = rooms.animate([
-                        { opacity: 0, filter: 'blur(8px)' },
-                        { opacity: 1, filter: 'blur(0px)' }
+                        { opacity: 0, filter: 'blur(12px) contrast(1.15)', offset: 0 },
+                        { opacity: 0, filter: 'blur(9px) contrast(1.15)', offset: .32 },
+                        { opacity: 1, filter: 'blur(0px) contrast(1.12)', offset: 1 }
                     ], timing);
                     const outgoingAnimation = outgoing.animate([
-                        { opacity: 1, filter: 'blur(0px)' },
-                        { opacity: 0, filter: 'blur(8px)' }
+                        { opacity: 1, filter: 'blur(0px) contrast(1.12)', offset: 0 },
+                        { opacity: 0, filter: 'blur(12px) contrast(1.15)', offset: .6 },
+                        { opacity: 0, filter: 'blur(12px) contrast(1.15)', offset: 1 }
                     ], { ...timing, fill: 'forwards' });
                     roomAnimations.push(incomingAnimation, outgoingAnimation);
                     outgoingAnimation.finished.then(() => outgoing.remove()).catch(() => {});

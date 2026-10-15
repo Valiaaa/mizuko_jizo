@@ -46,6 +46,7 @@
         const item = document.createElement('figure');
         const image = document.createElement('img');
         item.className = 'falling-object';
+        if (object.file === 'F-computer.png') item.classList.add('falling-object--computer');
         item.style.setProperty('--object-x', `${object.x}%`);
         item.style.setProperty('--object-y', `${object.y}vh`);
         item.style.setProperty('--object-width', `${object.width}vw`);
@@ -117,10 +118,6 @@
 
     const showScrollHint = () => {
         hideScrollHint();
-
-        if (window.scrollY > 8) {
-            return;
-        }
 
         section.classList.add('is-scroll-hint-visible');
         scrollHintTimer = window.setTimeout(hideScrollHint, 5000);
@@ -230,20 +227,6 @@
                 cursorFrame = window.requestAnimationFrame(
                     paintFallingCursor
                 );
-            }
-        }
-    }, { passive: true });
-
-    window.addEventListener('scroll', () => {
-        if (
-            section.classList.contains('is-scroll-hint-visible') &&
-            window.scrollY > 8
-        ) {
-            hideScrollHint();
-            if (event.detail?.scene === 'door-4') {
-                paintedX = pointerX;
-                paintedY = pointerY;
-                paintFallingCursor();
             }
         }
     }, { passive: true });

@@ -297,3 +297,6 @@
 
 /* Only room artwork blends; the separate object layer changes immediately. */
 .room-image-outgoing { position: absolute; inset: 0; pointer-events: none; }
+
+.rooms { filter: contrast(1.12); }
+.room-transition-dust { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }

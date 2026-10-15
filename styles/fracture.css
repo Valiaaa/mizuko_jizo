@@ -1,0 +1,21 @@
+.door-room[data-room='3'] { display: block; overflow: hidden; background: #fff; color: #111; }
+.fracture-stage { position: absolute; inset: 0; overflow: hidden; background: #fff; touch-action: none; }
+.fracture-plate { position: absolute; left: 50%; top: 0; width: min(100%, 177.777778vh); aspect-ratio: 16 / 9; transform: translateX(-50%); }
+.fracture-empty, .fracture-art, .fracture-echo, .fracture-copy, .fracture-dust { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.fracture-empty, .fracture-art, .fracture-echo { background-position: center; background-size: 100% 100%; background-repeat: no-repeat; }
+.fracture-empty { background-image: url('../assets/Page5.3_分裂_asset/empty-room.png'); }
+.fracture-art, .fracture-copy { opacity: 0; filter: blur(9px); transform: translateY(5px); transition: opacity 1700ms cubic-bezier(.22,.61,.36,1), filter 1700ms ease, transform 1700ms ease; }
+.fracture-stage.is-present .fracture-art, .fracture-stage.is-present .fracture-copy { opacity: 1; filter: blur(0); transform: none; }
+.fracture-stage.is-dispersing .fracture-art, .fracture-stage.is-dispersing .fracture-copy { opacity: 0; filter: blur(9px); transform: translateY(-5px); transition-duration: 1400ms; }
+.fracture-copy img { display: block; width: 100%; height: 100%; object-fit: fill; }
+.fracture-copy { mix-blend-mode: multiply; }
+/* Breathing lives on the image, so it cannot override the parent's fade. */
+.fracture-stage.is-restless .fracture-copy img { animation: fracture-breath 9s ease-in-out infinite; }
+.fracture-echo { opacity: 0; mix-blend-mode: multiply; }
+.fracture-stage.is-restless .fracture-echo { animation: fracture-slip 11s ease-in-out infinite; }
+.fracture-return { position: absolute; left: 55%; top: 73%; width: 25%; height: 23%; border: 0; background: transparent; }
+.fracture-return:focus-visible { outline: 1px dashed #861d1d; }
+@keyframes fracture-breath { 0%, 35%, 66%, 100% { filter: blur(0); opacity: 1; } 48% { filter: blur(.65px); opacity: .82; } 74% { filter: blur(.25px); opacity: .94; } }
+@keyframes fracture-slip { 0%, 38%, 56%, 100% { opacity: 0; transform: none; } 44% { opacity: .065; transform: translate(3px, -1px); filter: blur(1px); } 50% { opacity: .025; transform: translate(-2px, 1px); } }
+
+@media (prefers-reduced-motion: reduce) { .fracture-stage *, .fracture-stage.is-restless .fracture-copy img, .fracture-stage.is-restless .fracture-echo { animation: none; transition-duration: 1ms; } .fracture-dust { display: none; } }
