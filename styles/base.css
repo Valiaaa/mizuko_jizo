@@ -1,17 +1,17 @@
 /* Stylesheet entry point. Keep this order to preserve the cascade.
  * Edit the scene files below; shared late overrides live in scene-support.css. */
 @import url("./foundation.css?v=20261002-css-split");
-@import url("./room.css?v=20261015-ending-pace");
-@import url("./falling.css?v=20261015-ending-pace");
+@import url("./room.css?v=20261015-regional-stars");
+@import url("./falling.css?v=20261015-regional-stars");
 @import url("./hell.css?v=20261002-smooth-hover");
 @import url("./doors.css?v=20261002-css-split");
 @import url("./offerings.css?v=20261002-css-split");
-@import url("./reflection.css?v=20261015-ending-pace");
-@import url("./accident.css?v=20261015-ending-pace");
+@import url("./reflection.css?v=20261015-regional-stars");
+@import url("./accident.css?v=20261015-regional-stars");
 @import url("./scene-support.css?v=20261002-css-split");
-@import url("./cursor.css?v=20261015-ending-pace");
-@import url("./constellation.css?v=20261015-ending-pace");
+@import url("./cursor.css?v=20261015-regional-stars");
+@import url("./constellation.css?v=20261015-star-glow");
 
-@import url("./fracture.css?v=20261015-ending-pace");
+@import url("./fracture.css?v=20261015-regional-stars");
 
-@import url("./scroll-hint.css?v=20261015-ending-pace");
+@import url("./scroll-hint.css?v=20261015-regional-stars");

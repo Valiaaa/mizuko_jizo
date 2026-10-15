@@ -72,14 +72,21 @@ body.is-constellation-scene .constellation-scene { opacity: 1; visibility: visib
 .is-reading .night-prose { animation: night-copy-flicker 6700ms linear infinite; }
 .night-prose p { margin: 0; }
 .night-prose p + p { margin-top: 2.5em; }
-.night-stars-final { opacity: .82; }
-.is-night .night-stars-final { animation: night-star-shimmer 4100ms ease-in-out infinite; }
+.night-stars-final { opacity: .48; }
+/* A steady base preserves the drawing; feathered regions breathe independently. */
+.night-stars-region {
+    opacity: .24;
+    filter: brightness(1.1) drop-shadow(0 0 2px #f5eeeaaa);
+    mask-image: radial-gradient(ellipse 24% 37% at var(--region-x) var(--region-y), #000 25%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 24% 37% at var(--region-x) var(--region-y), #000 25%, transparent 100%);
+}
+.is-night .night-stars-region { animation: night-star-shimmer var(--twinkle-duration) ease-in-out var(--twinkle-delay) infinite; }
 .is-night .night-stars-red { animation: none; opacity: .65; }
 @keyframes night-star-shimmer {
-    0%,100% { opacity: .18; filter: drop-shadow(0 0 1px #e6d6d633); }
-    29% { opacity: 1; filter: brightness(1.3) drop-shadow(0 0 5px #e6d6d699); }
-    53% { opacity: .28; filter: drop-shadow(0 0 1px #e6d6d633); }
-    79% { opacity: .9; filter: drop-shadow(0 0 4px #e6d6d688); }
+    0%,100% { opacity: .10; filter: brightness(1) drop-shadow(0 0 1px #f5eeea44); }
+    28% { opacity: .72; filter: brightness(1.45) drop-shadow(0 0 3px #fff7efdd) drop-shadow(0 0 10px #f5eeea88); }
+    53% { opacity: .16; filter: brightness(1.05) drop-shadow(0 0 2px #f5eeea55); }
+    79% { opacity: .52; filter: brightness(1.25) drop-shadow(0 0 3px #fff7efbb) drop-shadow(0 0 7px #f5eeea66); }
 }
 @keyframes night-copy-enter { from { opacity: 0; filter: blur(5px); } to { opacity: 1; filter: blur(0); } }
 @keyframes night-copy-flicker {
@@ -104,7 +111,7 @@ body.is-constellation-scene .constellation-scene { opacity: 1; visibility: visib
 @media (max-width: 600px) { .night-copy { width: 84%; } .night-ceramic { width: min(12vw, 12vh); } }
 @media (prefers-reduced-motion: reduce) {
     .night-viewport, .night-body-morph, .night-body-small, .night-body-large, .night-sky, .night-ceramic { transition-duration: 1ms; }
-    .is-expanding .night-body-morph, .is-night .night-stars-final, .is-night .night-stars-red, .is-reading .night-prose, .night-longing, .night-copy { animation: none; }
+    .is-expanding .night-body-morph, .is-night .night-stars-region, .is-night .night-stars-red, .is-reading .night-prose, .night-longing, .night-copy { animation: none; }
 }
 /* Overlap the last fractional image row with the continuation background. */
 .is-complete .night-viewport::after { content: ''; position: absolute; z-index: 7; left: 0; right: 0; bottom: -1px; height: 3px; background: #2e2e2e; pointer-events: none; }
