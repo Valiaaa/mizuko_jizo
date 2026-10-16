@@ -1,0 +1,30 @@
+.portrait-notice { display: none; }
+
+/* A square viewport is supported; narrower viewports show only this notice. */
+@media (aspect-ratio < 1/1) {
+    html, body { overflow: hidden; background: #fff; }
+    body > :not(.portrait-notice) { display: none !important; }
+    body > .portrait-notice {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: grid;
+        place-items: center;
+        padding: 0 4vw;
+        background: #fff;
+        color: #555;
+        cursor: auto !important;
+    }
+    .portrait-notice p {
+        margin: 0;
+        font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif;
+        font-size: clamp(8px, 2.5vw, 28.8px);
+        font-weight: normal;
+        letter-spacing: .06em;
+        white-space: nowrap;
+        animation: ending-filament 6200ms linear infinite;
+    }
+}
+@media (aspect-ratio < 1/1) and (prefers-reduced-motion: reduce) {
+    .portrait-notice p { animation: none; }
+}
