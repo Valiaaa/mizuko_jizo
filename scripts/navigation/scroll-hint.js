@@ -1,7 +1,7 @@
 (() => {
     const cue = document.createElement('div');
     cue.className = 'story-scroll-hint'; cue.setAttribute('aria-hidden', 'true');
-    cue.innerHTML = '<span>向下滚动</span><i></i><i></i>';
+    cue.innerHTML = '<i></i><i></i>';
     document.body.append(cue);
     let timer = 0;
     const hide = () => { clearTimeout(timer); cue.classList.remove('is-visible'); };

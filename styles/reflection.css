@@ -106,7 +106,9 @@
     border: 0;
     background: transparent;
     color: inherit;
-    transform: translate(-50%, 18px);
+    opacity: 1;
+    transition: none;
+    transform: translate(-50%, 0);
 }
 
 .reflection-depth__text--last.is-visible {

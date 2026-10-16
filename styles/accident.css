@@ -108,3 +108,19 @@ body.is-constellation-scene .accident-stage { filter: blur(8px); }
 .accident-keyword:is(:hover, :focus-visible), .accident-keyword.is-chosen {
     filter: blur(.6px) drop-shadow(0 0 4px #9f080840);
 }
+
+/* Temporary ending; the later constellation scene remains available in source. */
+.accident-ending {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: #171513;
+    font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif;
+    font-size: clamp(24px, 3vw, 48px);
+    letter-spacing: .18em;
+    outline: none;
+}
+.accident-ending[hidden] { display: none; }
+.accident-scene.is-ended .accident-stage { visibility: hidden; pointer-events: none; }

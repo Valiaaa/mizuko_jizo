@@ -334,3 +334,5 @@ body.has-fourth-door .door-reflection:is(:hover, :focus-visible) .door-reflectio
     }
 }
 
+
+.searching-ellipsis { font-family: Arial, sans-serif; letter-spacing: 0; white-space: nowrap; }

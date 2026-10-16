@@ -1,6 +1,10 @@
 (() => {
     const scene = document.querySelector('#accident-scene');
     if (!scene) return;
+    // Temporary exhibition ending. Set false to restore the complete final part.
+    const pauseAfterAccident = true;
+    const ending = scene.querySelector('.accident-ending');
+    const stage = scene.querySelector('.accident-stage');
     const panels = [...scene.querySelectorAll('.accident-panel')];
     const cursor = document.querySelector('.custom-cursor');
     const params = new URLSearchParams(location.search);
@@ -31,6 +35,10 @@
     };
     const showPage = (value) => {
         stopDrag();
+        ending.hidden = true;
+        stage.inert = false;
+        stage.setAttribute('aria-hidden', 'false');
+        scene.classList.remove('is-ended');
         page = Math.max(1, Math.min(4, Number(value) || 1));
         panels.forEach((panel, index) => {
             const active = index + 1 === page;
@@ -62,7 +70,21 @@
         showPage(initialPage);
         return true;
     };
+    const showEnding = () => {
+        clearTransition();
+        stopDrag();
+        stage.inert = true;
+        stage.setAttribute('aria-hidden', 'true');
+        scene.classList.add('is-ended');
+        ending.hidden = false;
+        ending.focus({ preventScroll: true });
+        return true;
+    };
     const enterConstellation = () => {
+        if (pauseAfterAccident) {
+            if (window.mizukoExperience.getScene() !== 'accident') enterScene(4);
+            return showEnding();
+        }
         clearTransition();
         stopDrag();
         document.body.classList.remove('is-accident-scene', 'is-next-scene', 'is-door-scene',
@@ -80,7 +102,7 @@
     };
     scene.addEventListener('click', (event) => {
         const keyword = event.target.closest('.accident-keyword');
-        if (!keyword || transitioning || window.mizukoExperience.getScene() !== 'accident') return;
+        if (!keyword || scene.classList.contains('is-ended') || transitioning || window.mizukoExperience.getScene() !== 'accident') return;
         transitioning = true;
         keyword.classList.add('is-chosen');
         setCursor('eye');

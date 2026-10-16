@@ -1,7 +1,6 @@
 .story-scroll-hint { position: fixed; z-index: 30; bottom: max(36px, env(safe-area-inset-bottom)); left: 50%; width: 100px; height: 76px; transform: translateX(-50%); color: #ddd; pointer-events: none; opacity: 0; transition: opacity 350ms ease; text-align: center; filter: drop-shadow(0 0 8px #0005); }
 .story-scroll-hint.is-grey { color: #838383; filter: drop-shadow(0 0 5px #fff9); }
 .story-scroll-hint.is-visible { opacity: 1; }
-.story-scroll-hint span { display: block; font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif; font-size: 14px; letter-spacing: .14em; margin-bottom: 6px; }
 .story-scroll-hint i { display: block; width: 20px; height: 20px; margin: -7px auto 0; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(45deg); }
 .story-scroll-hint.is-visible i { animation: story-scroll-bounce 1100ms ease-in-out infinite; }
 .story-scroll-hint.is-visible i + i { animation-delay: 120ms; }

@@ -50,6 +50,7 @@
             tear.src = 'assets/Page6_Falling2_asset/rotate_anim.gif';
             rings.forEach((image) => image.src = 'assets/Page3_Falling_asset/Falling_BgLoop.gif');
             texts.forEach((text) => {
+                if (text === ending) return;
                 text.classList.remove('is-visible');
                 observer.observe(text);
             });
