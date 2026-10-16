@@ -277,3 +277,5 @@
 
 .offering-symbol:is([data-offering="windmill"], [data-offering="candy"], [data-offering="toy"]) { --offering-size: .9; }
 .offering-symbol:is([data-offering="flower"], [data-offering="conch"]) { --offering-size: .8; }
+
+.offering-symbol[data-offering="lantern"] { --offering-size: .8; }

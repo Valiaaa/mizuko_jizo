@@ -5,6 +5,9 @@
     const pauseAfterAccident = true;
     const ending = scene.querySelector('.accident-ending');
     const stage = scene.querySelector('.accident-stage');
+    const dissolve = scene.querySelector('.accident-dissolve');
+    const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+    let dissolveFrame = 0;
     const panels = [...scene.querySelectorAll('.accident-panel')];
     const cursor = document.querySelector('.custom-cursor');
     const params = new URLSearchParams(location.search);
@@ -56,6 +59,10 @@
     };
     const clearTransition = () => {
         clearTimeout(transitionTimer);
+        cancelAnimationFrame(dissolveFrame);
+        dissolveFrame = 0;
+        dissolve.hidden = true;
+        scene.classList.remove('is-dissolving');
         transitioning = false;
         scene.querySelectorAll('.is-chosen').forEach(e => e.classList.remove('is-chosen'));
         setCursor('default');
@@ -70,14 +77,82 @@
         showPage(initialPage);
         return true;
     };
+    // Sample the visible text and moved debris so the particles match the final frame.
+    const sampleEnding = () => {
+        const width = innerWidth, height = innerHeight;
+        const ratio = Math.min(1, 1000 / width);
+        dissolve.width = Math.ceil(width * ratio);
+        dissolve.height = Math.ceil(height * ratio);
+        const ctx = dissolve.getContext('2d', { willReadFrequently: true });
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx.clearRect(0, 0, width, height);
+        const panel = panels[page - 1];
+        panel.querySelectorAll('.accident-debris img').forEach(image => {
+            if (!image.complete || !image.naturalWidth) return;
+            const rect = image.getBoundingClientRect();
+            ctx.drawImage(image, rect.left, rect.top, rect.width, rect.height);
+        });
+        const walker = document.createTreeWalker(panel.querySelector('.accident-copy'), NodeFilter.SHOW_TEXT);
+        const range = document.createRange();
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        while (walker.nextNode()) {
+            const node = walker.currentNode;
+            const style = getComputedStyle(node.parentElement);
+            ctx.font = `${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+            ctx.fillStyle = style.color;
+            for (let i = 0; i < node.length; i++) {
+                if (!node.textContent[i].trim()) continue;
+                range.setStart(node, i); range.setEnd(node, i + 1);
+                const rect = range.getBoundingClientRect();
+                ctx.fillText(node.textContent[i], rect.left + rect.width / 2, rect.top + rect.height / 2);
+            }
+        }
+        const pixels = ctx.getImageData(0, 0, dissolve.width, dissolve.height).data;
+        const particles = [];
+        for (let y = 0; y < dissolve.height; y += 3) for (let x = 0; x < dissolve.width; x += 3) {
+            const n = (y * dissolve.width + x) * 4;
+            if (pixels[n + 3] < 30 || Math.min(pixels[n], pixels[n + 1], pixels[n + 2]) > 240) continue;
+            particles.push({ x: x / ratio, y: y / ratio, alpha: pixels[n + 3] / 255,
+                color: `rgb(${pixels[n]},${pixels[n+1]},${pixels[n+2]})`,
+                dx: (Math.random() - .4) * 190, dy: -25 - Math.random() * 110,
+                size: 2 / ratio, delay: Math.random() * .22 });
+        }
+        return { ctx, particles, width, height };
+    };
     const showEnding = () => {
+        if (scene.classList.contains('is-ended') || scene.classList.contains('is-dissolving')) return true;
         clearTransition();
         stopDrag();
+        transitioning = true;
         stage.inert = true;
         stage.setAttribute('aria-hidden', 'true');
-        scene.classList.add('is-ended');
-        ending.hidden = false;
-        ending.focus({ preventScroll: true });
+        const finish = () => {
+            clearTransition();
+            scene.classList.add('is-ended');
+            ending.hidden = false;
+            ending.focus({ preventScroll: true });
+        };
+        if (reducedMotion.matches) { finish(); return true; }
+        let sample;
+        try { sample = sampleEnding(); } catch { finish(); return true; }
+        const { ctx, particles, width, height } = sample;
+        dissolve.hidden = false;
+        scene.classList.add('is-dissolving');
+        const start = performance.now();
+        const draw = now => {
+            const progress = Math.min(1, (now - start) / 1600);
+            ctx.clearRect(0, 0, width, height);
+            for (const p of particles) {
+                const t = Math.max(0, Math.min(1, (progress - p.delay) / (1 - p.delay)));
+                ctx.globalAlpha = p.alpha * (1 - t) ** 1.5;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x + p.dx * t * t, p.y + p.dy * t, p.size * (1 - t * .6), p.size * (1 - t * .6));
+            }
+            ctx.globalAlpha = 1;
+            if (progress < 1) dissolveFrame = requestAnimationFrame(draw);
+            else finish();
+        };
+        dissolveFrame = requestAnimationFrame(draw);
         return true;
     };
     const enterConstellation = () => {
@@ -94,6 +169,7 @@
         return true;
     };
     const step = (direction) => {
+        if (transitioning) return false;
         clearTransition();
         if (page === 1 && direction < 0) return window.mizukoNavigation.goTo('door-4');
         if (page === 4 && direction > 0) return enterConstellation();

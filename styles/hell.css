@@ -121,11 +121,13 @@ body.is-next-scene .hell-stage__pattern { animation-play-state: running; }
     z-index: 5;
 }
 
-body.is-next-scene .hell-object.is-motion-ready .hell-object__still {
+.hell-object.is-active.is-motion-ready .hell-object__still,
+body.is-hell-story .hell-object.is-motion-ready .hell-object__still {
     opacity: 0;
 }
 
-body.is-next-scene .hell-object.is-motion-ready .hell-object__motion {
+.hell-object.is-active.is-motion-ready .hell-object__motion,
+body.is-hell-story .hell-object.is-motion-ready .hell-object__motion {
     opacity: 1;
 }
 
@@ -418,15 +420,13 @@ body.is-hell-accusing .hell-story__accusation {
 }
 
 
-/* Full-opacity impact, followed by a brief directional blur trail. */
+/* A sharp, single growth; preserve the original ember glow and blur. */
 body.is-hell-accusing .hell-story__accusation {
-    animation: accusation-impact 360ms ease-out both;
+    animation: accusation-impact 150ms cubic-bezier(.16, 1, .3, 1) both;
 }
 @keyframes accusation-impact {
-    0% { transform: translate(-50%, -50%) scale(1.14); filter: blur(0); }
-    18% { transform: translate(calc(-50% - 7px), -50%) scale(1.04); filter: blur(1.8px); text-shadow: 14px 0 2px #9f080880, -10px 0 3px #9f080860; }
-    42% { transform: translate(calc(-50% + 4px), -50%); filter: blur(.7px); text-shadow: -8px 0 3px #9f080860; }
-    100% { transform: translate(-50%, -50%); }
+    from { transform: translate(-50%, -50%) scale(.96); }
+    to { transform: translate(-50%, -50%) scale(1); }
 }
 @media (prefers-reduced-motion: reduce) {
     body.is-hell-accusing .hell-story__accusation { animation: none; }
