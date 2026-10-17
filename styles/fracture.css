@@ -19,3 +19,7 @@
 @keyframes fracture-slip { 0%, 38%, 56%, 100% { opacity: 0; transform: none; } 44% { opacity: .065; transform: translate(3px, -1px); filter: blur(1px); } 50% { opacity: .025; transform: translate(-2px, 1px); } }
 
 @media (prefers-reduced-motion: reduce) { .fracture-stage *, .fracture-stage.is-restless .fracture-copy img, .fracture-stage.is-restless .fracture-echo { animation: none; transition-duration: 1ms; } .fracture-dust { display: none; } }
+
+.fracture-copy img[hidden], .fracture-copy__fallback[hidden] { display: none; }
+.fracture-copy__fallback { position: absolute; top: 10%; left: 6%; width: 42%; margin: 0; font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif; font-size: clamp(14px, 1.5vw, 27px); line-height: 1.7; }
+.fracture-return.is-fallback { left: auto; right: 5%; top: auto; bottom: 5%; width: auto; height: auto; padding: .6em 1em; background: #fff; color: #555; font-family: 'ChillHuoFangSongConRegular', 'Songti TC', serif; font-size: 16px; border: 1px solid #aaa; }

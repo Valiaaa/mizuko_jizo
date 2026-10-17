@@ -7,7 +7,10 @@
     const echo = stage.querySelector('.fracture-echo');
     const text = stage.querySelector('.fracture-copy img');
     const canvas = stage.querySelector('canvas');
-    const ctx = canvas.getContext('2d');
+    let ctx = null;
+    try { ctx = canvas.getContext('2d'); } catch (error) { console.warn('Fracture canvas unavailable:', error); }
+    const fallback = stage.querySelector('.fracture-copy__fallback');
+    let particlesAvailable = Boolean(ctx);
     const back = stage.querySelector('.fracture-return');
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const root = 'assets/Page5.3_分裂_asset/';
@@ -17,21 +20,37 @@
         '你为何要来找我？来戳穿我的谎言，指责我的懦弱，或者更糟，告诉我，其实你爱我。——那么那一晚呢？那一晚对你来说是什么意义？我对你来说，又是什么意义？然而，这不是我欲听的话。赛璐珈糖果般晃眼的美梦，一睁开眼却是——黑。色。的。明。天。',
         '是恨你的。想要忘记你。想要超越你。想要我能够活下去的，这样的恨意。'
     ];
+    const loaded = image => image.complete && image.naturalWidth > 0;
+    // Rendering must not depend on decode(), or wait indefinitely for a request.
+    const loadImage = (image, url) => new Promise(resolve => {
+        let timer;
+        const finish = success => {
+            clearTimeout(timer);
+            image.removeEventListener('load', onLoad);
+            image.removeEventListener('error', onError);
+            resolve(success);
+        };
+        const onLoad = () => finish(loaded(image));
+        const onError = () => finish(false);
+        image.addEventListener('load', onLoad);
+        image.addEventListener('error', onError);
+        timer = setTimeout(() => finish(loaded(image)), 8000);
+        image.src = url;
+        if (image.complete) finish(loaded(image));
+    });
     const images = Array.from({ length: 4 }, (_, i) => {
         const background = new Image(), copy = new Image();
-        background.src = `${root}scene${i + 1}.jpg`;
-        copy.src = `${root}text${i + 1}.png`;
-        return { background, copy, ready: Promise.all([background.decode(), copy.decode()]) };
+        const backgroundUrl = `${root}scene${i + 1}.jpg`, copyUrl = `${root}text${i + 1}.png`;
+        return { background, copy, backgroundUrl, copyUrl,
+            ready: Promise.all([loadImage(background, backgroundUrl), loadImage(copy, copyUrl)]) };
     });
-    // Keep loading failures handled even when a later scene has not been opened yet.
-    images.forEach(item => item.ready.catch(() => {}));
     let index = 0, active = false, busy = false, version = 0, frame = 0;
     let particles = [], started = 0, mode = 'in', width = 0, height = 0, wheelTotal = 0, touchY = null;
     function resize() {
         width = plate.clientWidth; height = plate.clientHeight;
         const ratio = Math.min(devicePixelRatio || 1, 2);
         canvas.width = width * ratio; canvas.height = height * ratio;
-        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+        ctx?.setTransform(ratio, 0, 0, ratio, 0, 0);
     }
     function sample(image) {
         const buffer = document.createElement('canvas');
@@ -52,12 +71,15 @@
         f.beginPath(); outline.forEach(([x,y],i)=>i?f.lineTo(x*960,y*540):f.moveTo(x*960,y*540)); f.closePath(); f.clip();
         f.drawImage(images[index].background, 0, 0, 960, 540);
         const ink = f.getImageData(0,0,960,540);
-        const reference = document.createElement('canvas'); reference.width=960; reference.height=540;
-        const r = reference.getContext('2d', {willReadFrequently:true}); r.drawImage(images[3].background,0,0,960,540);
-        const baseline=r.getImageData(0,0,960,540).data;
-        for(let n=0;n<ink.data.length;n+=4) {
-            // Remove unchanged architecture (including the window visible through the silhouette bounds).
-            if(index<3 && Math.max(Math.abs(ink.data[n]-baseline[n]),Math.abs(ink.data[n+1]-baseline[n+1]),Math.abs(ink.data[n+2]-baseline[n+2]))<38) ink.data[n+3]=0;
+        // The fourth image improves masking, but is optional for every other page.
+        if (index < 3 && loaded(images[3].background)) {
+            const reference = document.createElement('canvas'); reference.width=960; reference.height=540;
+            const r = reference.getContext('2d', {willReadFrequently:true});
+            r.drawImage(images[3].background,0,0,960,540);
+            const baseline=r.getImageData(0,0,960,540).data;
+            for(let n=0;n<ink.data.length;n+=4) {
+                if(Math.max(Math.abs(ink.data[n]-baseline[n]),Math.abs(ink.data[n+1]-baseline[n+1]),Math.abs(ink.data[n+2]-baseline[n+2]))<38) ink.data[n+3]=0;
+            }
         }
         f.putImageData(ink,0,0); c.drawImage(figure,0,0);
         const pixels = c.getImageData(0, 0, 960, 540).data;
@@ -90,38 +112,75 @@
     }
     function dust(direction) {
         cancelAnimationFrame(frame);
-        sample(images[index].copy);
-        if (reduced.matches) return;
-        mode = direction; started = performance.now();
-        frame = requestAnimationFrame(draw);
+        if (!particlesAvailable || reduced.matches || !loaded(images[index].copy) || !loaded(images[index].background)) return;
+        try {
+            sample(images[index].copy);
+            mode = direction; started = performance.now();
+            frame = requestAnimationFrame(draw);
+        } catch (error) {
+            // Canvas readback can fail; it must never block the story or navigation.
+            particlesAvailable = false;
+            particles = [];
+            ctx?.clearRect(0, 0, width, height);
+            console.warn('Fracture particles disabled; continuing with image transitions:', error);
+        }
     }
     const pause = ms => new Promise(resolve => setTimeout(resolve, reduced.matches ? 0 : ms));
     async function show(value, initial = false) {
         if (!active || busy || value < 0 || value > 3) return;
         busy = true;
         const token = ++version;
-        try { await Promise.all([images[value].ready, images[3].ready]); } catch { busy = false; return; }
-        if (token !== version || !active) return;
-        if (!initial) {
-            stage.classList.remove('is-restless', 'is-present');
-            stage.classList.add('is-dispersing'); dust('out');
-            await pause(1500);
+        const item = images[value];
+        try {
+            // Retry failed preloads when opening a page, with the same bounded wait.
+            const ready = await item.ready;
             if (token !== version || !active) return;
+            await Promise.all([
+                !ready[0] && !loaded(item.background) ? loadImage(item.background, item.backgroundUrl) : true,
+                !ready[1] && !loaded(item.copy) ? loadImage(item.copy, item.copyUrl) : true
+            ]);
+            if (token !== version || !active) return;
+            if (!initial) {
+                stage.classList.remove('is-restless', 'is-present');
+                stage.classList.add('is-dispersing'); dust('out');
+                await pause(1500);
+                if (token !== version || !active) return;
+            }
+            stage.classList.remove('is-present', 'is-restless');
+            stage.classList.add('is-dispersing');
+            index = value; stage.dataset.page = String(index + 1);
+            // Set the silhouette independently of whether particles are supported.
+            art.style.clipPath = echo.style.clipPath = 'polygon(49% 27%,94% 27%,94% 100%,49% 100%)';
+            art.style.backgroundImage = loaded(item.background) ? `url("${item.background.src}")` : 'none';
+            echo.style.backgroundImage = art.style.backgroundImage;
+            text.hidden = !loaded(item.copy);
+            fallback.hidden = !text.hidden;
+            fallback.textContent = descriptions[index];
+            if (!text.hidden) text.src = item.copy.src;
+            text.alt = descriptions[index];
+            // A visible return remains available when either essential image fails.
+            const degraded = !loaded(item.background) || !loaded(item.copy);
+            back.classList.toggle('is-fallback', degraded);
+            back.textContent = degraded ? '返回三扇门' : '';
+            back.hidden = !degraded;
+            resize(); dust('in');
+            // Flush the hidden frame without waiting for background-tab animation frames.
+            void stage.offsetWidth;
+            stage.classList.remove('is-dispersing'); stage.classList.add('is-present');
+            await pause(1800);
+        } catch (error) {
+            console.warn('Fracture reveal failed; showing readable fallback:', error);
+            index = value; stage.dataset.page = String(index + 1);
+            text.hidden = true; fallback.hidden = false; fallback.textContent = descriptions[index];
+            back.classList.add('is-fallback'); back.textContent = '返回三扇门'; back.hidden = false;
+        } finally {
+            if (token === version && active) {
+                busy = false;
+                stage.classList.remove('is-dispersing');
+                stage.classList.add('is-present', 'is-restless');
+                if (!back.classList.contains('is-fallback')) back.hidden = index !== 3;
+            }
         }
-        stage.classList.remove('is-present', 'is-restless');
-        stage.classList.add('is-dispersing');
-        index = value; stage.dataset.page = String(index + 1);
-        art.style.backgroundImage = `url("${images[index].background.src}")`;
-        echo.style.backgroundImage = art.style.backgroundImage;
-        text.src = images[index].copy.src; text.alt = descriptions[index];
-        back.hidden = true;
-        resize(); dust('in');
-        // Let the new transparent frame paint before starting the shared reveal.
-        await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-        if (token !== version || !active) return;
-        stage.classList.remove('is-dispersing'); stage.classList.add('is-present');
-        await pause(1800);
-        if (token === version) { busy = false; stage.classList.add('is-restless'); back.hidden = index !== 3; }
     }
     function step(direction) {
         if (busy) return;
@@ -148,7 +207,7 @@
     window.addEventListener('resize', resize);
     function sync(scene) {
         active = scene === 'door-3'; version++; busy = false; wheelTotal = 0;
-        cancelAnimationFrame(frame); ctx.clearRect(0, 0, width, height);
+        cancelAnimationFrame(frame); ctx?.clearRect(0, 0, width, height);
         stage.classList.remove('is-dispersing', 'is-restless', 'is-present');
         if (active) show(0, true);
     }
