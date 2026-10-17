@@ -375,7 +375,7 @@ body.is-hell-story .hell-story {
     margin: 0;
     color: #9f0808;
     font-family: 'ChillHuoFangSongConBold', serif;
-    font-style: italic;
+    font-style: normal;
     font-size: clamp(25px, 3.1vw, 58px);
     letter-spacing: -3%;
     line-height: 1.5;
@@ -417,17 +417,4 @@ body.is-hell-accusing .hell-story__narrative {
 body.is-hell-accusing .hell-story__accusation {
     opacity: 1;
     transform: translate(-50%, -50%);
-}
-
-
-/* A sharp, single growth; preserve the original ember glow and blur. */
-body.is-hell-accusing .hell-story__accusation {
-    animation: accusation-impact 150ms cubic-bezier(.16, 1, .3, 1) both;
-}
-@keyframes accusation-impact {
-    from { transform: translate(-50%, -50%) scale(.96); }
-    to { transform: translate(-50%, -50%) scale(1); }
-}
-@media (prefers-reduced-motion: reduce) {
-    body.is-hell-accusing .hell-story__accusation { animation: none; }
 }
