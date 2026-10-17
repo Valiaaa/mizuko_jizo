@@ -1,8 +1,8 @@
 (() => {
     const scene = document.querySelector('#accident-scene');
     if (!scene) return;
-    // Temporary exhibition ending. Set false to restore the complete final part.
-    const pauseAfterAccident = true;
+    // Restore the clearing scene after the final accident keyword.
+    const pauseAfterAccident = false;
     const ending = scene.querySelector('.accident-ending');
     const stage = scene.querySelector('.accident-stage');
     const dissolve = scene.querySelector('.accident-dissolve');
@@ -119,7 +119,7 @@
         }
         return { ctx, particles, width, height };
     };
-    const showEnding = () => {
+    const showEnding = (immediate = false) => {
         if (scene.classList.contains('is-ended') || scene.classList.contains('is-dissolving')) return true;
         clearTransition();
         stopDrag();
@@ -132,7 +132,7 @@
             ending.hidden = false;
             ending.focus({ preventScroll: true });
         };
-        if (reducedMotion.matches) { finish(); return true; }
+        if (immediate || reducedMotion.matches) { finish(); return true; }
         let sample;
         try { sample = sampleEnding(); } catch { finish(); return true; }
         const { ctx, particles, width, height } = sample;
@@ -154,6 +154,11 @@
         };
         dissolveFrame = requestAnimationFrame(draw);
         return true;
+    };
+    const enterEnding = () => {
+        // Reuse the white ending surface without painting an accident panel.
+        enterScene(4);
+        return showEnding(true);
     };
     const enterConstellation = () => {
         if (pauseAfterAccident) {
@@ -218,7 +223,7 @@
         stone.dataset.x = String(dx); stone.dataset.y = String(dy);
         stone.style.setProperty('--drag-x', `${dx}px`); stone.style.setProperty('--drag-y', `${dy}px`);
     });
-    window.mizukoAccidentExperience = { enterScene, enterConstellation, step, getCursorMode };
+    window.mizukoAccidentExperience = { enterScene, enterConstellation, enterEnding, step, getCursorMode };
     window.addEventListener('mizuko:scenechange', (event) => {
         if (event.detail.scene !== 'accident') {
             clearTransition(); stopDrag(); document.body.classList.remove('is-accident-scene');

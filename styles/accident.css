@@ -129,7 +129,7 @@ body.is-constellation-scene .accident-stage { filter: blur(8px); }
 .accident-dissolve { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .accident-dissolve[hidden] { display: none; }
 .accident-scene.is-dissolving .accident-stage { opacity: 0; transition: opacity 280ms ease-out; pointer-events: none; }
-.accident-scene.is-ended { background: #fff; }
+.accident-scene.is-ended { z-index: 12; background: #fff; }
 .accident-scene.is-ended .accident-ending__text { animation: ending-filament 6200ms linear infinite; }
 @keyframes ending-filament {
     0%, 62%, 66%, 73%, 78%, 100% { opacity: 1; transform: none; filter: blur(0); }

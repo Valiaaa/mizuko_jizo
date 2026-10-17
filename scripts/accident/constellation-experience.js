@@ -7,6 +7,8 @@
     const ceramic = scene.querySelector('.night-ceramic');
     const copy = scene.querySelector('.night-copy');
     const continueButton = scene.querySelector('.night-continue');
+    // Keep the later night/ceramic sequence in source for a future version.
+    const endAfterClearing = true;
     const reduced = matchMedia('(prefers-reduced-motion: reduce)');
     const cursor = document.querySelector('.custom-cursor');
     let active = false, phase = 'clearing', drag = null, timer = 0;
@@ -119,6 +121,10 @@
     };
     body.addEventListener('click', () => {
         if (!active || body.disabled || phase !== 'clearing') return;
+        if (endAfterClearing) {
+            window.mizukoAccidentExperience.enterEnding();
+            return;
+        }
         phase = 'expanding'; scene.dataset.phase = phase;
         objectLayer.inert = true;
         scene.classList.add('is-expanding'); setCursor('eye');
